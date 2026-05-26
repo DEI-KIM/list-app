@@ -8,7 +8,9 @@
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="list">
-    <meta name="theme-color" content="#FF8FAB">
+    <meta name="theme-color" content="#1E0547">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Great+Vibes&display=swap" rel="stylesheet">
     <style>
         * { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
 
@@ -33,14 +35,21 @@
         #setupScreen {
             min-height:100vh; padding:48px 28px 36px;
             display:flex; flex-direction:column; align-items:center; justify-content:center;
-            background:linear-gradient(160deg,#fff0f5 0%,var(--bg) 100%);
+            background:linear-gradient(160deg, #0D0129 0%, #1A0440 50%, #2D0A6B 100%);
         }
 
-        .setup-logo { font-size:80px; margin-bottom:18px; animation:beat 2.4s infinite; }
+        .setup-logo {
+            font-size:72px; margin-bottom:14px; animation:beat 2.4s infinite;
+            filter: grayscale(1) brightness(0.1) contrast(5);
+        }
         @keyframes beat { 0%,100%{transform:scale(1)} 30%{transform:scale(1.07)} 60%{transform:scale(1)} 80%{transform:scale(1.04)} }
 
-        .setup-title { font-size:30px; font-weight:900; color:var(--pink-dark); }
-        .setup-sub { font-size:14px; color:var(--gray); margin:8px 0 44px; line-height:1.7; text-align:center; }
+        .setup-title {
+            font-family: 'Great Vibes', cursive;
+            font-size:54px; font-weight:400;
+            color:#E2D0FF; letter-spacing:2px;
+        }
+        .setup-sub { font-size:13px; color:rgba(255,255,255,0.4); margin:10px 0 44px; line-height:1.8; text-align:center; }
 
         .setup-step { width:100%; display:none; }
         .setup-step.active { display:block; }
@@ -51,25 +60,27 @@
             margin-bottom:12px; transition:all .2s; font-family:inherit;
         }
         .big-btn:active { transform:scale(.97); }
-        .big-btn.primary { background:var(--pink); color:#fff; box-shadow:0 4px 18px rgba(255,143,171,.4); }
-        .big-btn.secondary { background:#fff; color:var(--pink); border:2px solid var(--pink-light); }
+        .big-btn.primary { background:#7C3AED; color:#fff; box-shadow:0 4px 22px rgba(124,58,237,.55); }
+        .big-btn.secondary { background:rgba(255,255,255,0.07); color:rgba(255,255,255,0.85); border:1.5px solid rgba(155,108,248,0.35); }
 
         .code-box {
-            background:#fff; border:2.5px dashed var(--pink-light);
+            background:rgba(255,255,255,0.07); border:2px dashed rgba(155,108,248,0.45);
             border-radius:20px; padding:24px; margin:18px 0;
         }
-        .code-box .lbl { font-size:12px; color:var(--gray); margin-bottom:8px; }
-        .code-box .code { font-size:40px; font-weight:900; letter-spacing:10px; color:var(--pink); }
-        .code-box .hint { font-size:12px; color:var(--gray); margin-top:10px; line-height:1.6; }
+        .code-box .lbl { font-size:12px; color:rgba(255,255,255,0.45); margin-bottom:8px; }
+        .code-box .code { font-size:40px; font-weight:900; letter-spacing:10px; color:#C4A9FF; }
+        .code-box .hint { font-size:12px; color:rgba(255,255,255,0.35); margin-top:10px; line-height:1.6; }
 
         .code-input {
-            width:100%; padding:16px; border:2px solid var(--border);
+            width:100%; padding:16px; border:2px solid rgba(155,108,248,0.3);
             border-radius:16px; font-size:24px; font-weight:700;
             text-align:center; letter-spacing:8px; outline:none;
-            margin-bottom:14px; font-family:inherit; text-transform:uppercase; background:#fff;
+            margin-bottom:14px; font-family:inherit; text-transform:uppercase;
+            background:rgba(255,255,255,0.08); color:#fff;
         }
-        .code-input:focus { border-color:var(--pink); }
-        .back-link { color:var(--gray); font-size:14px; cursor:pointer; margin-top:6px; display:inline-block; padding:8px; }
+        .code-input::placeholder { color:rgba(255,255,255,0.25); }
+        .code-input:focus { border-color:#9B6CF8; }
+        .back-link { color:rgba(255,255,255,0.38); font-size:14px; cursor:pointer; margin-top:6px; display:inline-block; padding:8px; }
 
         /* ======= MAIN APP ======= */
         #mainApp { display:none; flex-direction:column; height:100vh; height:-webkit-fill-available; }
@@ -282,9 +293,9 @@
 
 <!-- ========== SETUP SCREEN ========== -->
 <div id="setupScreen">
-    <div class="setup-logo">💑</div>
-    <h1 class="setup-title">우리의 기록</h1>
-    <p class="setup-sub">두 사람만의 특별한 공간 ✨<br>함께 만들어가는 소중한 추억</p>
+    <div class="setup-logo">🖤</div>
+    <h1 class="setup-title">our record</h1>
+    <p class="setup-sub">두 사람만의 특별한 공간<br>함께 만들어가는 소중한 추억</p>
 
     <!-- Step 1 -->
     <div class="setup-step active" id="step1">
