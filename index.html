@@ -1,0 +1,794 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>list</title>
+    <link rel="manifest" id="manifestLink">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="list">
+    <meta name="theme-color" content="#FF8FAB">
+    <style>
+        * { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+
+        :root {
+            --pink: #FF8FAB;
+            --pink-light: #FFD6E0;
+            --pink-dark: #C9596E;
+            --bg: #FFF5F7;
+            --card: #FFFFFF;
+            --gray: #888888;
+            --gray-light: #F5F5F5;
+            --text: #2D2D2D;
+            --border: #FFE0EA;
+            --safe-top: env(safe-area-inset-top);
+            --safe-bottom: env(safe-area-inset-bottom);
+        }
+
+        html, body { height:100%; overflow:hidden; }
+        body { font-family:-apple-system,BlinkMacSystemFont,'Apple SD Gothic Neo',sans-serif; background:var(--bg); color:var(--text); }
+
+        /* ======= SETUP SCREEN ======= */
+        #setupScreen {
+            min-height:100vh; padding:48px 28px 36px;
+            display:flex; flex-direction:column; align-items:center; justify-content:center;
+            background:linear-gradient(160deg,#fff0f5 0%,var(--bg) 100%);
+        }
+
+        .setup-logo { font-size:80px; margin-bottom:18px; animation:beat 2.4s infinite; }
+        @keyframes beat { 0%,100%{transform:scale(1)} 30%{transform:scale(1.07)} 60%{transform:scale(1)} 80%{transform:scale(1.04)} }
+
+        .setup-title { font-size:30px; font-weight:900; color:var(--pink-dark); }
+        .setup-sub { font-size:14px; color:var(--gray); margin:8px 0 44px; line-height:1.7; text-align:center; }
+
+        .setup-step { width:100%; display:none; }
+        .setup-step.active { display:block; }
+
+        .big-btn {
+            width:100%; padding:17px; border-radius:16px;
+            font-size:16px; font-weight:700; border:none; cursor:pointer;
+            margin-bottom:12px; transition:all .2s; font-family:inherit;
+        }
+        .big-btn:active { transform:scale(.97); }
+        .big-btn.primary { background:var(--pink); color:#fff; box-shadow:0 4px 18px rgba(255,143,171,.4); }
+        .big-btn.secondary { background:#fff; color:var(--pink); border:2px solid var(--pink-light); }
+
+        .code-box {
+            background:#fff; border:2.5px dashed var(--pink-light);
+            border-radius:20px; padding:24px; margin:18px 0;
+        }
+        .code-box .lbl { font-size:12px; color:var(--gray); margin-bottom:8px; }
+        .code-box .code { font-size:40px; font-weight:900; letter-spacing:10px; color:var(--pink); }
+        .code-box .hint { font-size:12px; color:var(--gray); margin-top:10px; line-height:1.6; }
+
+        .code-input {
+            width:100%; padding:16px; border:2px solid var(--border);
+            border-radius:16px; font-size:24px; font-weight:700;
+            text-align:center; letter-spacing:8px; outline:none;
+            margin-bottom:14px; font-family:inherit; text-transform:uppercase; background:#fff;
+        }
+        .code-input:focus { border-color:var(--pink); }
+        .back-link { color:var(--gray); font-size:14px; cursor:pointer; margin-top:6px; display:inline-block; padding:8px; }
+
+        /* ======= MAIN APP ======= */
+        #mainApp { display:none; flex-direction:column; height:100vh; height:-webkit-fill-available; }
+
+        .header {
+            background:#fff; border-bottom:1px solid var(--border);
+            padding:calc(var(--safe-top) + 14px) 16px 14px;
+            display:flex; align-items:center; justify-content:center; position:relative; flex-shrink:0;
+        }
+        .header-title { font-size:20px; font-weight:800; color:#6D28D9; letter-spacing:-0.5px; }
+        .header-code {
+            position:absolute; right:14px;
+            font-size:11px; font-weight:700; color:var(--pink-dark);
+            background:var(--bg); padding:4px 10px; border-radius:10px;
+            cursor:pointer; border:1px solid var(--pink-light);
+        }
+
+        .content { flex:1; overflow-y:auto; -webkit-overflow-scrolling:touch; padding-bottom:calc(68px + var(--safe-bottom)); }
+
+        .tab-panel { display:none; padding:16px; }
+        .tab-panel.active { display:block; }
+
+        .panel-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:14px; }
+        .panel-title { font-size:21px; font-weight:800; }
+
+        .plus-btn {
+            width:38px; height:38px; border-radius:50%;
+            background:var(--pink); color:#fff; border:none; font-size:22px;
+            cursor:pointer; display:flex; align-items:center; justify-content:center;
+            box-shadow:0 3px 10px rgba(255,143,171,.45); transition:all .2s; flex-shrink:0;
+        }
+        .plus-btn:active { transform:scale(.87); }
+
+        /* Bottom Nav */
+        .bottom-nav {
+            position:fixed; bottom:0; left:0; right:0;
+            background:#fff; border-top:1px solid var(--border);
+            display:flex; padding-bottom:var(--safe-bottom); z-index:100;
+        }
+        .nav-btn {
+            flex:1; display:flex; flex-direction:column; align-items:center;
+            padding:10px 0 6px; cursor:pointer; background:none; border:none; transition:all .18s;
+        }
+        .nav-icon { font-size:22px; margin-bottom:3px; transition:transform .2s; }
+        .nav-label { font-size:11px; color:var(--gray); font-weight:500; }
+        .nav-btn.active .nav-label { color:var(--pink); font-weight:700; }
+        .nav-btn.active .nav-icon { transform:scale(1.12); }
+
+        /* List Item */
+        .list-item {
+            background:#fff; border-radius:18px; padding:16px;
+            margin-bottom:10px; border:1px solid var(--border);
+            cursor:pointer; transition:all .18s;
+        }
+        .list-item:active { transform:scale(.975); }
+
+        .item-row { display:flex; align-items:flex-start; justify-content:space-between; gap:8px; }
+        .item-main { flex:1; overflow:hidden; }
+        .item-title { font-size:16px; font-weight:700; color:var(--text); line-height:1.3; }
+        .item-title.done { text-decoration:line-through; color:#aaa; }
+        .item-date { font-size:12px; color:var(--gray); margin-top:5px; }
+        .item-review { font-size:13px; color:var(--gray); margin-top:4px; font-style:italic; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+        .item-stars { margin-top:5px; font-size:14px; }
+        .item-photos { display:flex; gap:5px; margin-top:8px; overflow:hidden; }
+        .item-thumb { width:52px; height:52px; border-radius:10px; object-fit:cover; flex-shrink:0; }
+
+        .check-btn {
+            width:26px; height:26px; border-radius:50%; border:2.5px solid var(--pink-light);
+            background:none; cursor:pointer; display:flex; align-items:center; justify-content:center;
+            flex-shrink:0; transition:all .2s; font-size:13px; color:#fff;
+        }
+        .check-btn.done { background:var(--pink); border-color:var(--pink); }
+        .del-btn { background:none; border:none; color:#ddd; font-size:16px; cursor:pointer; padding:2px 0 2px 4px; flex-shrink:0; }
+        .del-btn:active { color:#FF5C5C; }
+
+        /* Empty */
+        .empty { text-align:center; padding:60px 20px; }
+        .empty-emoji { font-size:52px; margin-bottom:12px; }
+        .empty-msg { font-size:14px; color:var(--gray); line-height:1.7; }
+
+        /* ======= MODALS ======= */
+        .overlay {
+            position:fixed; inset:0; background:rgba(0,0,0,.48);
+            z-index:300; display:flex; align-items:flex-end;
+            opacity:0; pointer-events:none; transition:opacity .28s;
+        }
+        .overlay.open { opacity:1; pointer-events:all; }
+
+        .sheet {
+            background:#fff; border-radius:24px 24px 0 0;
+            width:100%; max-height:92vh; overflow-y:auto;
+            -webkit-overflow-scrolling:touch;
+            padding:0 22px calc(20px + var(--safe-bottom));
+            transform:translateY(100%); transition:transform .3s ease;
+        }
+        .overlay.open .sheet { transform:translateY(0); }
+
+        .sheet-handle { width:44px; height:5px; background:#E0E0E0; border-radius:3px; margin:14px auto 18px; flex-shrink:0; }
+        .sheet-title { font-size:18px; font-weight:800; color:var(--text); margin-bottom:18px; padding-right:30px; }
+
+        .detail-close {
+            position:absolute; right:14px; top:12px;
+            width:32px; height:32px; border-radius:50%;
+            background:var(--gray-light); border:none; font-size:15px;
+            cursor:pointer; display:flex; align-items:center; justify-content:center; z-index:10;
+        }
+
+        .form-label { font-size:13px; font-weight:700; color:var(--gray); margin-bottom:7px; display:block; }
+
+        .form-input {
+            width:100%; padding:13px 15px; border:1.5px solid var(--border);
+            border-radius:14px; font-size:15px; font-family:inherit;
+            outline:none; background:var(--bg); margin-bottom:18px; color:var(--text);
+        }
+        .form-input:focus { border-color:var(--pink); }
+
+        .form-textarea {
+            width:100%; min-height:90px; padding:13px 15px;
+            border:1.5px solid var(--border); border-radius:14px;
+            font-size:15px; font-family:inherit; outline:none;
+            resize:none; background:var(--bg); margin-bottom:18px; color:var(--text);
+        }
+        .form-textarea:focus { border-color:var(--pink); }
+
+        /* Star Rating */
+        .star-wrap { display:flex; gap:6px; margin-bottom:18px; }
+        .star-btn { font-size:30px; background:none; border:none; cursor:pointer; line-height:1; transition:transform .1s; padding:0; }
+        .star-btn:active { transform:scale(1.35); }
+
+        /* Bucket toggle */
+        .check-row {
+            display:flex; align-items:center; gap:14px;
+            padding:14px 16px; background:var(--bg); border-radius:14px; margin-bottom:18px; cursor:pointer;
+        }
+        .check-circle {
+            width:28px; height:28px; border-radius:50%; border:2.5px solid var(--pink-light);
+            display:flex; align-items:center; justify-content:center;
+            font-size:14px; flex-shrink:0; transition:all .2s; color:#fff;
+        }
+        .check-circle.done { background:var(--pink); border-color:var(--pink); }
+        .check-lbl { font-size:15px; font-weight:600; }
+
+        /* Photo Grid */
+        .photo-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:8px; margin-bottom:20px; }
+        .photo-wrap { aspect-ratio:1; border-radius:12px; overflow:hidden; position:relative; }
+        .photo-wrap img { width:100%; height:100%; object-fit:cover; }
+        .photo-del {
+            position:absolute; top:4px; right:4px;
+            width:22px; height:22px; border-radius:50%;
+            background:rgba(0,0,0,.55); color:#fff; border:none;
+            font-size:12px; display:flex; align-items:center; justify-content:center; cursor:pointer;
+        }
+        .add-photo {
+            aspect-ratio:1; border-radius:12px; border:2px dashed var(--pink-light);
+            background:#FFF8FA; display:flex; flex-direction:column;
+            align-items:center; justify-content:center; cursor:pointer;
+            color:var(--pink-light); font-size:26px; transition:all .2s;
+        }
+        .add-photo span { font-size:10px; margin-top:2px; color:var(--pink-light); }
+        .add-photo:active { background:var(--pink-light); }
+
+        /* Action Row */
+        .action-row { display:flex; gap:10px; margin-top:4px; padding-bottom:4px; }
+        .save-btn {
+            flex:1; padding:15px; border-radius:14px;
+            background:var(--pink); color:#fff; border:none;
+            font-size:16px; font-weight:700; cursor:pointer; font-family:inherit; transition:all .2s;
+        }
+        .save-btn:active { transform:scale(.97); background:var(--pink-dark); }
+        .del-action-btn {
+            padding:15px 18px; border-radius:14px;
+            background:#FFF0F0; color:#FF5C5C; border:none;
+            font-size:15px; font-weight:700; cursor:pointer; font-family:inherit;
+        }
+
+        /* Add Sheet */
+        .add-input {
+            width:100%; padding:14px 16px; border:2px solid var(--border);
+            border-radius:14px; font-size:16px; font-family:inherit;
+            outline:none; background:var(--bg); margin-bottom:12px; color:var(--text);
+        }
+        .add-input:focus { border-color:var(--pink); }
+        .add-confirm {
+            width:100%; padding:15px; border-radius:14px;
+            background:var(--pink); color:#fff; border:none;
+            font-size:16px; font-weight:700; cursor:pointer; font-family:inherit; transition:all .2s;
+        }
+        .add-confirm:active { transform:scale(.97); }
+
+        /* Toast */
+        .toast {
+            position:fixed; bottom:calc(88px + var(--safe-bottom)); left:50%;
+            transform:translateX(-50%) translateY(10px);
+            background:rgba(30,30,30,.88); color:#fff;
+            padding:10px 22px; border-radius:22px; font-size:14px; font-weight:500;
+            opacity:0; transition:all .25s; z-index:999; white-space:nowrap; pointer-events:none;
+        }
+        .toast.show { opacity:1; transform:translateX(-50%) translateY(0); }
+
+        /* Warning */
+        .warn-box {
+            background:#FFF3CD; border:1px solid #FFD060;
+            border-radius:14px; padding:14px 16px;
+            font-size:13px; color:#7A5800; margin-bottom:20px; line-height:1.6;
+            width:100%;
+        }
+    </style>
+</head>
+<body>
+
+<!-- ========== SETUP SCREEN ========== -->
+<div id="setupScreen">
+    <div class="setup-logo">?뮂</div>
+    <h1 class="setup-title">?곕━??湲곕줉</h1>
+    <p class="setup-sub">???щ엺留뚯쓽 ?밸퀎??怨듦컙 ??br>?④퍡 留뚮뱾?닿????뚯쨷??異붿뼲</p>
+
+    <!-- Step 1 -->
+    <div class="setup-step active" id="step1">
+        <button class="big-btn primary" onclick="showStep('create')">?뮑 ?덈줈??而ㅽ뵆 肄붾뱶 留뚮뱾湲?/button>
+        <button class="big-btn secondary" onclick="showStep('join')">?뵎 ?뚰듃??肄붾뱶 ?낅젰?섍린</button>
+    </div>
+
+    <!-- Step Create -->
+    <div class="setup-step" id="stepCreate">
+        <div class="code-box">
+            <div class="lbl">?뱥 而ㅽ뵆 肄붾뱶</div>
+            <div class="code" id="genCode">------</div>
+            <div class="hint">?뚰듃?덉뿉寃???肄붾뱶瑜??뚮젮二쇱꽭??br>?뚰듃?덈룄 媛숈? 肄붾뱶瑜??낅젰?섎㈃ ?곌껐?쇱슂</div>
+        </div>
+        <button class="big-btn primary" onclick="startWithCode(document.getElementById('genCode').textContent)">?쒖옉?섍린 ??/button>
+        <div class="back-link" onclick="showStep('1')">???뚯븘媛湲?/div>
+    </div>
+
+    <!-- Step Join -->
+    <div class="setup-step" id="stepJoin">
+        <input type="text" class="code-input" id="joinInput" placeholder="XXXXXX" maxlength="6" oninput="this.value=this.value.toUpperCase().replace(/[^A-Z0-9]/g,'')">
+        <button class="big-btn primary" onclick="joinWithCode()">?곌껐?섍린 ??/button>
+        <div class="back-link" onclick="showStep('1')">???뚯븘媛湲?/div>
+    </div>
+</div>
+
+<!-- ========== MAIN APP ========== -->
+<div id="mainApp">
+    <div class="header">
+        <span class="header-title">list</span>
+        <span class="header-code" id="headerCode" onclick="copyCode()">蹂듭궗</span>
+    </div>
+
+    <div class="content" id="mainContent">
+        <!-- Bucket List -->
+        <div class="tab-panel active" id="tab-bucket">
+            <div class="panel-header">
+                <span class="panel-title">?ぃ 踰꾪궥由ъ뒪??/span>
+                <button class="plus-btn" onclick="openAdd('bucket')">+</button>
+            </div>
+            <div id="bucket-list"></div>
+        </div>
+
+        <!-- Spot List -->
+        <div class="tab-panel" id="tab-spot">
+            <div class="panel-header">
+                <span class="panel-title">?뱧 ?ㅽ뙚由ъ뒪??/span>
+                <button class="plus-btn" onclick="openAdd('spot')">+</button>
+            </div>
+            <div id="spot-list"></div>
+        </div>
+
+        <!-- Dining List -->
+        <div class="tab-panel" id="tab-dining">
+            <div class="panel-header">
+                <span class="panel-title">?띂截??ㅼ씠?앸━?ㅽ듃</span>
+                <button class="plus-btn" onclick="openAdd('dining')">+</button>
+            </div>
+            <div id="dining-list"></div>
+        </div>
+    </div>
+
+    <nav class="bottom-nav">
+        <button class="nav-btn active" id="nav-bucket" onclick="switchTab('bucket')">
+            <span class="nav-icon">?ぃ</span>
+            <span class="nav-label">踰꾪궥由ъ뒪??/span>
+        </button>
+        <button class="nav-btn" id="nav-spot" onclick="switchTab('spot')">
+            <span class="nav-icon">?뱧</span>
+            <span class="nav-label">?ㅽ뙚</span>
+        </button>
+        <button class="nav-btn" id="nav-dining" onclick="switchTab('dining')">
+            <span class="nav-icon">?띂截?/span>
+            <span class="nav-label">?ㅼ씠??/span>
+        </button>
+    </nav>
+</div>
+
+<!-- ========== ADD MODAL ========== -->
+<div class="overlay" id="addOverlay" onclick="if(event.target===this)closeAdd()">
+    <div class="sheet">
+        <div class="sheet-handle"></div>
+        <div class="sheet-title" id="addTitle">異붽??섍린</div>
+        <input type="text" class="add-input" id="addInput" placeholder="?쒕ぉ???낅젰?섏꽭?? onkeydown="if(event.key==='Enter')confirmAdd()">
+        <button class="add-confirm" onclick="confirmAdd()">異붽??섍린 ??/button>
+    </div>
+</div>
+
+<!-- ========== DETAIL MODAL ========== -->
+<div class="overlay" id="detailOverlay" onclick="if(event.target===this)closeDetail()">
+    <div class="sheet" style="position:relative;">
+        <button class="detail-close" onclick="closeDetail()">??/button>
+        <div class="sheet-handle"></div>
+        <div id="detailContent"></div>
+    </div>
+</div>
+
+<!-- Toast & File Input -->
+<div class="toast" id="toast"></div>
+<input type="file" id="photoInput" accept="image/*" style="display:none" onchange="onPhotoFile(event)">
+
+<!-- Firebase -->
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-database-compat.js"></script>
+
+<script>
+// ==============================================================
+// ?뵦 FIREBASE ?ㅼ젙 - ?꾨옒 媛믩뱾??Firebase 肄섏넄?먯꽌 蹂듭궗?댁꽌 ?ｌ쑝?몄슂
+// ==============================================================
+const firebaseConfig = {
+    apiKey:            "AIzaSyC1amehq6MFCcA2ZyMqOjQY1v067xv7Xh0",
+    authDomain:        "list-6773f.firebaseapp.com",
+    databaseURL:       "https://list-6773f-default-rtdb.firebaseio.com",
+    projectId:         "list-6773f",
+    storageBucket:     "list-6773f.firebasestorage.app",
+    messagingSenderId: "607880224551",
+    appId:             "1:607880224551:web:d303a9a177b9b7ad111302"
+};
+// ==============================================================
+
+let db = null;
+try {
+    if (!firebaseConfig.apiKey.startsWith('REPLACE')) {
+        firebase.initializeApp(firebaseConfig);
+        db = firebase.database();
+    }
+} catch(e) { console.error('Firebase init error:', e); }
+
+// ??? State ???????????????????????????????????????
+let coupleCode     = null;
+let currentTab     = 'bucket';
+let data           = { bucket:{}, spot:{}, dining:{} };
+let addType        = null;
+let detailType     = null;
+let detailId       = null;
+let detailItem     = null;
+let detailOpen     = false;
+let toastTimer     = null;
+
+// ??? Setup ???????????????????????????????????????
+function showStep(s) {
+    document.querySelectorAll('.setup-step').forEach(el => el.classList.remove('active'));
+    if (s === 'create') {
+        document.getElementById('genCode').textContent = genCode();
+        document.getElementById('stepCreate').classList.add('active');
+    } else if (s === 'join') {
+        document.getElementById('joinInput').value = '';
+        document.getElementById('stepJoin').classList.add('active');
+    } else {
+        document.getElementById('step1').classList.add('active');
+    }
+}
+
+function genCode() {
+    const c = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+    return Array.from({length:6}, () => c[Math.floor(Math.random()*c.length)]).join('');
+}
+
+function joinWithCode() {
+    const v = document.getElementById('joinInput').value.trim();
+    if (v.length < 4) { showToast('肄붾뱶瑜??낅젰?댁＜?몄슂'); return; }
+    startWithCode(v);
+}
+
+function startWithCode(code) {
+    if (!db) { showToast('Firebase ?ㅼ젙???꾩슂?⑸땲??); return; }
+    coupleCode = code;
+    localStorage.setItem('coupleCode', code);
+    initApp();
+}
+
+// ??? App Init ???????????????????????????????????
+function initApp() {
+    document.getElementById('setupScreen').style.display = 'none';
+    const app = document.getElementById('mainApp');
+    app.style.display = 'flex';
+    app.style.flexDirection = 'column';
+    document.getElementById('headerCode').textContent = '?뵎 ' + coupleCode;
+
+    db.ref('couples/' + coupleCode).on('value', snap => {
+        const raw = snap.val() || {};
+        data.bucket = raw.bucket || {};
+        data.spot   = raw.spot   || {};
+        data.dining = raw.dining || {};
+        renderAll();
+    }, err => { showToast('?곌껐 ?ㅻ쪟: ' + err.message); });
+}
+
+function copyCode() {
+    if (navigator.clipboard) {
+        navigator.clipboard.writeText(coupleCode).then(() => showToast('肄붾뱶 蹂듭궗?? ?뱥'));
+    } else { showToast('肄붾뱶: ' + coupleCode); }
+}
+
+// ??? Navigation ?????????????????????????????????
+function switchTab(tab) {
+    currentTab = tab;
+    document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+    document.getElementById('tab-' + tab).classList.add('active');
+    document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+    document.getElementById('nav-' + tab).classList.add('active');
+    document.getElementById('mainContent').scrollTop = 0;
+}
+
+// ??? Render ?????????????????????????????????????
+function renderAll() {
+    renderList('bucket');
+    renderList('spot');
+    renderList('dining');
+}
+
+function renderList(type) {
+    const el = document.getElementById(type + '-list');
+    const items = data[type] || {};
+    const sorted = Object.entries(items).sort((a,b) => (b[1].dateAdded||'') > (a[1].dateAdded||'') ? 1 : -1);
+
+    if (!sorted.length) {
+        const icons = {bucket:'?뙚', spot:'?뿺截?, dining:'?뜶'};
+        const msgs  = {bucket:'泥?踰덉㎏ 踰꾪궥由ъ뒪?몃?\n異붽??대낫?몄슂!', spot:'媛怨??띠? ?μ냼瑜?n異붽??대낫?몄슂!', dining:'媛怨??띠? 留쏆쭛??n異붽??대낫?몄슂!'};
+        el.innerHTML = `<div class="empty"><div class="empty-emoji">${icons[type]}</div><div class="empty-msg">${msgs[type]}</div></div>`;
+        return;
+    }
+    el.innerHTML = sorted.map(([id, item]) => itemHTML(type, id, item)).join('');
+}
+
+function itemHTML(type, id, item) {
+    const date   = item.dateAdded ? new Date(item.dateAdded).toLocaleDateString('ko-KR',{year:'numeric',month:'long',day:'numeric'}) : '';
+    const photos = Array.isArray(item.photos) ? item.photos : [];
+
+    let inner = '';
+    if (type === 'bucket') {
+        const done = !!item.completed;
+        inner = `
+            <div class="item-row">
+                <div class="item-main">
+                    <div class="item-title${done?' done':''}">${esc(item.title)}</div>
+                    <div class="item-date">${date}</div>
+                    ${item.description ? `<div class="item-review">${esc(item.description)}</div>` : ''}
+                </div>
+                <div style="display:flex;gap:6px;align-items:center;flex-shrink:0;">
+                    <button class="del-btn" onclick="event.stopPropagation();delItem('bucket','${id}')">??/button>
+                    <button class="check-btn${done?' done':''}" onclick="event.stopPropagation();toggleDone('${id}',${done})">${done?'??:''}</button>
+                </div>
+            </div>`;
+    } else {
+        const r = item.rating || 0;
+        inner = `
+            <div class="item-row">
+                <div class="item-main">
+                    <div class="item-title">${esc(item.title)}</div>
+                    <div class="item-stars">${[1,2,3,4,5].map(i => i<=r?'狩?:'??).join('')}</div>
+                    ${item.review ? `<div class="item-review">"${esc(item.review)}"</div>` : ''}
+                    <div class="item-date">${date}</div>
+                </div>
+                <button class="del-btn" style="align-self:flex-start;" onclick="event.stopPropagation();delItem('${type}','${id}')">??/button>
+            </div>`;
+    }
+
+    const thumbs = photos.slice(0,3).map(p => `<img class="item-thumb" src="${p}" alt="">`).join('');
+    const more   = photos.length > 3 ? `<div class="item-thumb" style="background:#f0f0f0;display:flex;align-items:center;justify-content:center;font-size:12px;color:#888;border-radius:10px;">+${photos.length-3}</div>` : '';
+
+    return `<div class="list-item" onclick="openDetail('${type}','${id}')">${inner}${photos.length?`<div class="item-photos">${thumbs}${more}</div>`:''}</div>`;
+}
+
+// ??? Add Modal ??????????????????????????????????
+function openAdd(type) {
+    addType = type;
+    const labels = {bucket:'踰꾪궥 異붽? ?뙚', spot:'?ㅽ뙚 異붽? ?뱧', dining:'留쏆쭛 異붽? ?띂截?};
+    document.getElementById('addTitle').textContent = labels[type];
+    document.getElementById('addInput').value = '';
+    document.getElementById('addOverlay').classList.add('open');
+    setTimeout(() => document.getElementById('addInput').focus(), 350);
+}
+
+function closeAdd() { document.getElementById('addOverlay').classList.remove('open'); }
+
+function confirmAdd() {
+    const title = document.getElementById('addInput').value.trim();
+    if (!title) { showToast('?쒕ぉ???낅젰?댁＜?몄슂'); return; }
+    const id = Date.now().toString();
+    db.ref('couples/' + coupleCode + '/' + addType + '/' + id).set({
+        title, dateAdded:new Date().toISOString(),
+        completed:false, description:'', review:'', rating:0, photos:[]
+    }).then(() => showToast('異붽??먯뼱?? ??)).catch(() => showToast('?ㅻ쪟媛 諛쒖깮?덉뼱??));
+    closeAdd();
+}
+
+// ??? Detail Modal ???????????????????????????????
+function openDetail(type, id) {
+    detailType = type;
+    detailId   = id;
+    detailItem = JSON.parse(JSON.stringify(data[type][id] || {}));
+    if (!Array.isArray(detailItem.photos)) detailItem.photos = [];
+    detailOpen = true;
+    renderDetail();
+    document.getElementById('detailOverlay').classList.add('open');
+}
+
+function renderDetail() {
+    const t = detailType, it = detailItem;
+    const photos = it.photos || [];
+
+    const photoGrid = `
+        <div class="photo-grid">
+            ${photos.map((p,i) => `<div class="photo-wrap"><img src="${p}" alt=""><button class="photo-del" onclick="removePhoto(${i})">??/button></div>`).join('')}
+            <div class="add-photo" onclick="pickPhoto()"><span>+</span><span>?ъ쭊</span></div>
+        </div>`;
+
+    let html = '';
+    if (t === 'bucket') {
+        const done = !!it.completed;
+        html = `
+            <div class="sheet-title">${esc(it.title)}</div>
+            <div class="check-row" onclick="toggleDetailDone()">
+                <div class="check-circle${done?' done':''}" id="dCircle">${done?'??:''}</div>
+                <span class="check-lbl" id="dLabel">${done?'?꾨즺?덉뼱?? ?럦':'?꾩쭅 ?꾨즺 ?꾩씠?먯슂'}</span>
+            </div>
+            <label class="form-label">硫붾え ?뱷</label>
+            <textarea class="form-textarea" id="dDesc" placeholder="湲곕줉???④꺼蹂댁꽭??.." oninput="detailItem.description=this.value">${esc(it.description||'')}</textarea>
+            <label class="form-label">?ъ쭊 ?벝</label>
+            ${photoGrid}
+            <div class="action-row">
+                <button class="save-btn" onclick="saveDetail()">??ν븯湲??뮶</button>
+                <button class="del-action-btn" onclick="deleteDetail()">??젣</button>
+            </div>`;
+    } else {
+        const r = it.rating || 0;
+        html = `
+            <div class="sheet-title">${esc(it.title)}</div>
+            <label class="form-label">?됱젏 狩?/label>
+            <div class="star-wrap" id="starWrap">
+                ${[1,2,3,4,5].map(i => `<button class="star-btn" onclick="setRating(${i})">${i<=r?'狩?:'??}</button>`).join('')}
+            </div>
+            <label class="form-label">?쒖쨪???랃툘</label>
+            <input type="text" class="form-input" id="dReview" placeholder="??以??뚭컧???④꺼蹂댁꽭?? value="${esc(it.review||'')}" oninput="detailItem.review=this.value">
+            <label class="form-label">?ъ쭊 ?벝</label>
+            ${photoGrid}
+            <div class="action-row">
+                <button class="save-btn" onclick="saveDetail()">??ν븯湲??뮶</button>
+                <button class="del-action-btn" onclick="deleteDetail()">??젣</button>
+            </div>`;
+    }
+    document.getElementById('detailContent').innerHTML = html;
+}
+
+function closeDetail() {
+    document.getElementById('detailOverlay').classList.remove('open');
+    detailOpen = false;
+}
+
+function toggleDetailDone() {
+    detailItem.completed = !detailItem.completed;
+    const c = document.getElementById('dCircle'), l = document.getElementById('dLabel');
+    if (c) { c.className = 'check-circle' + (detailItem.completed?' done':''); c.textContent = detailItem.completed?'??:''; }
+    if (l) { l.textContent = detailItem.completed ? '?꾨즺?덉뼱?? ?럦' : '?꾩쭅 ?꾨즺 ?꾩씠?먯슂'; }
+}
+
+function setRating(n) {
+    detailItem.rating = n;
+    const w = document.getElementById('starWrap');
+    if (w) w.innerHTML = [1,2,3,4,5].map(i => `<button class="star-btn" onclick="setRating(${i})">${i<=n?'狩?:'??}</button>`).join('');
+}
+
+function saveDetail() {
+    db.ref('couples/' + coupleCode + '/' + detailType + '/' + detailId).update({
+        description: detailItem.description || '',
+        review:      detailItem.review      || '',
+        rating:      detailItem.rating      || 0,
+        completed:   detailItem.completed   || false,
+        photos:      detailItem.photos      || []
+    }).then(() => {
+        showToast('??λ릱?댁슂! ?뮶');
+        closeDetail();
+    }).catch(() => showToast('????ㅻ쪟'));
+}
+
+function deleteDetail() {
+    if (!confirm('??젣?좉퉴??')) return;
+    db.ref('couples/' + coupleCode + '/' + detailType + '/' + detailId).remove()
+        .then(() => { showToast('??젣?먯뼱??); closeDetail(); });
+}
+
+// ??? Quick Actions ??????????????????????????????
+function toggleDone(id, current) {
+    db.ref('couples/' + coupleCode + '/bucket/' + id + '/completed').set(!current);
+}
+
+function delItem(type, id) {
+    if (!confirm('??젣?좉퉴??')) return;
+    db.ref('couples/' + coupleCode + '/' + type + '/' + id).remove()
+        .then(() => showToast('??젣?먯뼱??));
+}
+
+// ??? Photos ?????????????????????????????????????
+function pickPhoto() { document.getElementById('photoInput').click(); }
+
+function onPhotoFile(e) {
+    const file = e.target.files[0]; if (!file) return;
+    e.target.value = '';
+    showToast('?ъ쭊 異붽? 以?..');
+    compressImg(file).then(b64 => {
+        detailItem.photos.push(b64);
+        renderDetail();
+        showToast('?ъ쭊 異붽????벝');
+    });
+}
+
+function removePhoto(i) {
+    detailItem.photos.splice(i,1);
+    renderDetail();
+}
+
+function compressImg(file, maxW=500, q=0.65) {
+    return new Promise(resolve => {
+        const r = new FileReader();
+        r.onload = ev => {
+            const img = new Image();
+            img.onload = () => {
+                let w = img.width, h = img.height;
+                if (w > maxW) { h = Math.round(h*maxW/w); w = maxW; }
+                const c = document.createElement('canvas');
+                c.width = w; c.height = h;
+                c.getContext('2d').drawImage(img, 0, 0, w, h);
+                resolve(c.toDataURL('image/jpeg', q));
+            };
+            img.src = ev.target.result;
+        };
+        r.readAsDataURL(file);
+    });
+}
+
+// ??? Utils ??????????????????????????????????????
+function esc(s) {
+    if (!s) return '';
+    return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+function showToast(msg) {
+    const t = document.getElementById('toast');
+    t.textContent = msg; t.classList.add('show');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => t.classList.remove('show'), 2300);
+}
+
+// ??? Start ??????????????????????????????????????
+window.addEventListener('load', () => {
+    if (!db) {
+        const w = document.createElement('div');
+        w.className = 'warn-box';
+        w.innerHTML = '?좑툘 <b>Firebase ?ㅼ젙 ?꾩슂</b><br>index.html ?뚯씪??firebaseConfig 媛믪쓣 Firebase 肄섏넄?먯꽌 蹂듭궗???ㅼ젣 媛믪쑝濡?援먯껜?댁＜?몄슂.';
+        document.getElementById('setupScreen').insertBefore(w, document.querySelector('.setup-logo'));
+    }
+
+    coupleCode = localStorage.getItem('coupleCode');
+    if (coupleCode && db) {
+        initApp();
+    }
+});
+
+// ?? ?꾩씠肄??숈쟻 ?앹꽦 (罹붾쾭?ㅻ줈 PNG ?앹꽦) ??
+(function() {
+    try {
+        const c = document.createElement('canvas');
+        c.width = 180; c.height = 180;
+        const ctx = c.getContext('2d');
+        ctx.fillStyle = '#7C3AED';
+        const r = 36;
+        ctx.beginPath();
+        ctx.moveTo(r,0); ctx.lineTo(180-r,0); ctx.arcTo(180,0,180,r,r);
+        ctx.lineTo(180,180-r); ctx.arcTo(180,180,180-r,180,r);
+        ctx.lineTo(r,180); ctx.arcTo(0,180,0,180-r,r);
+        ctx.lineTo(0,r); ctx.arcTo(0,0,r,0,r);
+        ctx.closePath(); ctx.fill();
+        ctx.fillStyle = 'white';
+        ctx.font = 'bold 58px -apple-system,BlinkMacSystemFont,Helvetica Neue,sans-serif';
+        ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+        ctx.fillText('list', 90, 92);
+        const link = document.createElement('link');
+        link.rel = 'apple-touch-icon';
+        link.href = c.toDataURL('image/png');
+        document.head.appendChild(link);
+    } catch(e) {}
+})();
+
+// ?? 留ㅻ땲?섏뒪???숈쟻 ?앹꽦 ??
+(function() {
+    try {
+        const m = { name:'list', short_name:'list', start_url:'./', display:'standalone',
+            background_color:'#FFF5F7', theme_color:'#FF8FAB',
+            icons:[{src:'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><rect width="512" height="512" rx="110" fill="%237C3AED"/><text x="256" y="256" text-anchor="middle" dominant-baseline="middle" font-family="sans-serif" font-weight="800" font-size="172" fill="white">list</text></svg>',sizes:'any',type:'image/svg+xml'}]
+        };
+        const blob = new Blob([JSON.stringify(m)], {type:'application/manifest+json'});
+        document.getElementById('manifestLink').href = URL.createObjectURL(blob);
+    } catch(e) {}
+})();
+
+// ?? ?쒕퉬???뚯빱 (?몃씪??釉붾∼) ??
+if ('serviceWorker' in navigator) {
+    try {
+        const sw = `self.addEventListener('install',()=>self.skipWaiting());self.addEventListener('activate',e=>e.waitUntil(self.clients.claim()));`;
+        const blob = new Blob([sw], {type:'application/javascript'});
+        navigator.serviceWorker.register(URL.createObjectURL(blob)).catch(()=>{});
+    } catch(e) {}
+}
+</script>
+</body>
+</html>
