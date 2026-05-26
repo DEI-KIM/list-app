@@ -282,32 +282,32 @@
 
 <!-- ========== SETUP SCREEN ========== -->
 <div id="setupScreen">
-    <div class="setup-logo">?뮂</div>
-    <h1 class="setup-title">?곕━??湲곕줉</h1>
-    <p class="setup-sub">???щ엺留뚯쓽 ?밸퀎??怨듦컙 ??br>?④퍡 留뚮뱾?닿????뚯쨷??異붿뼲</p>
+    <div class="setup-logo">💑</div>
+    <h1 class="setup-title">우리의 기록</h1>
+    <p class="setup-sub">두 사람만의 특별한 공간 ✨<br>함께 만들어가는 소중한 추억</p>
 
     <!-- Step 1 -->
     <div class="setup-step active" id="step1">
-        <button class="big-btn primary" onclick="showStep('create')">?뮑 ?덈줈??而ㅽ뵆 肄붾뱶 留뚮뱾湲?/button>
-        <button class="big-btn secondary" onclick="showStep('join')">?뵎 ?뚰듃??肄붾뱶 ?낅젰?섍린</button>
+        <button class="big-btn primary" onclick="showStep('create')">💝 새로운 커플 코드 만들기</button>
+        <button class="big-btn secondary" onclick="showStep('join')">🔑 파트너 코드 입력하기</button>
     </div>
 
     <!-- Step Create -->
     <div class="setup-step" id="stepCreate">
         <div class="code-box">
-            <div class="lbl">?뱥 而ㅽ뵆 肄붾뱶</div>
+            <div class="lbl">📋 커플 코드</div>
             <div class="code" id="genCode">------</div>
-            <div class="hint">?뚰듃?덉뿉寃???肄붾뱶瑜??뚮젮二쇱꽭??br>?뚰듃?덈룄 媛숈? 肄붾뱶瑜??낅젰?섎㈃ ?곌껐?쇱슂</div>
+            <div class="hint">파트너에게 이 코드를 알려주세요<br>파트너도 같은 코드를 입력하면 연결돼요</div>
         </div>
-        <button class="big-btn primary" onclick="startWithCode(document.getElementById('genCode').textContent)">?쒖옉?섍린 ??/button>
-        <div class="back-link" onclick="showStep('1')">???뚯븘媛湲?/div>
+        <button class="big-btn primary" onclick="startWithCode(document.getElementById('genCode').textContent)">시작하기 →</button>
+        <div class="back-link" onclick="showStep('1')">← 돌아가기</div>
     </div>
 
     <!-- Step Join -->
     <div class="setup-step" id="stepJoin">
         <input type="text" class="code-input" id="joinInput" placeholder="XXXXXX" maxlength="6" oninput="this.value=this.value.toUpperCase().replace(/[^A-Z0-9]/g,'')">
-        <button class="big-btn primary" onclick="joinWithCode()">?곌껐?섍린 ??/button>
-        <div class="back-link" onclick="showStep('1')">???뚯븘媛湲?/div>
+        <button class="big-btn primary" onclick="joinWithCode()">연결하기 →</button>
+        <div class="back-link" onclick="showStep('1')">← 돌아가기</div>
     </div>
 </div>
 
@@ -315,14 +315,14 @@
 <div id="mainApp">
     <div class="header">
         <span class="header-title">list</span>
-        <span class="header-code" id="headerCode" onclick="copyCode()">蹂듭궗</span>
+        <span class="header-code" id="headerCode" onclick="copyCode()">복사</span>
     </div>
 
     <div class="content" id="mainContent">
         <!-- Bucket List -->
         <div class="tab-panel active" id="tab-bucket">
             <div class="panel-header">
-                <span class="panel-title">?ぃ 踰꾪궥由ъ뒪??/span>
+                <span class="panel-title">🪣 버킷리스트</span>
                 <button class="plus-btn" onclick="openAdd('bucket')">+</button>
             </div>
             <div id="bucket-list"></div>
@@ -331,7 +331,7 @@
         <!-- Spot List -->
         <div class="tab-panel" id="tab-spot">
             <div class="panel-header">
-                <span class="panel-title">?뱧 ?ㅽ뙚由ъ뒪??/span>
+                <span class="panel-title">📍 스팟리스트</span>
                 <button class="plus-btn" onclick="openAdd('spot')">+</button>
             </div>
             <div id="spot-list"></div>
@@ -340,7 +340,7 @@
         <!-- Dining List -->
         <div class="tab-panel" id="tab-dining">
             <div class="panel-header">
-                <span class="panel-title">?띂截??ㅼ씠?앸━?ㅽ듃</span>
+                <span class="panel-title">🍽️ 다이닝리스트</span>
                 <button class="plus-btn" onclick="openAdd('dining')">+</button>
             </div>
             <div id="dining-list"></div>
@@ -349,16 +349,16 @@
 
     <nav class="bottom-nav">
         <button class="nav-btn active" id="nav-bucket" onclick="switchTab('bucket')">
-            <span class="nav-icon">?ぃ</span>
-            <span class="nav-label">踰꾪궥由ъ뒪??/span>
+            <span class="nav-icon">🪣</span>
+            <span class="nav-label">버킷리스트</span>
         </button>
         <button class="nav-btn" id="nav-spot" onclick="switchTab('spot')">
-            <span class="nav-icon">?뱧</span>
-            <span class="nav-label">?ㅽ뙚</span>
+            <span class="nav-icon">📍</span>
+            <span class="nav-label">스팟</span>
         </button>
         <button class="nav-btn" id="nav-dining" onclick="switchTab('dining')">
-            <span class="nav-icon">?띂截?/span>
-            <span class="nav-label">?ㅼ씠??/span>
+            <span class="nav-icon">🍽️</span>
+            <span class="nav-label">다이닝</span>
         </button>
     </nav>
 </div>
@@ -367,16 +367,16 @@
 <div class="overlay" id="addOverlay" onclick="if(event.target===this)closeAdd()">
     <div class="sheet">
         <div class="sheet-handle"></div>
-        <div class="sheet-title" id="addTitle">異붽??섍린</div>
-        <input type="text" class="add-input" id="addInput" placeholder="?쒕ぉ???낅젰?섏꽭?? onkeydown="if(event.key==='Enter')confirmAdd()">
-        <button class="add-confirm" onclick="confirmAdd()">異붽??섍린 ??/button>
+        <div class="sheet-title" id="addTitle">추가하기</div>
+        <input type="text" class="add-input" id="addInput" placeholder="제목을 입력하세요" onkeydown="if(event.key==='Enter')confirmAdd()">
+        <button class="add-confirm" onclick="confirmAdd()">추가하기 ✨</button>
     </div>
 </div>
 
 <!-- ========== DETAIL MODAL ========== -->
 <div class="overlay" id="detailOverlay" onclick="if(event.target===this)closeDetail()">
     <div class="sheet" style="position:relative;">
-        <button class="detail-close" onclick="closeDetail()">??/button>
+        <button class="detail-close" onclick="closeDetail()">✕</button>
         <div class="sheet-handle"></div>
         <div id="detailContent"></div>
     </div>
@@ -392,7 +392,7 @@
 
 <script>
 // ==============================================================
-// ?뵦 FIREBASE ?ㅼ젙 - ?꾨옒 媛믩뱾??Firebase 肄섏넄?먯꽌 蹂듭궗?댁꽌 ?ｌ쑝?몄슂
+// 🔥 FIREBASE 설정 - 아래 값들을 Firebase 콘솔에서 복사해서 넣으세요
 // ==============================================================
 const firebaseConfig = {
     apiKey:            "AIzaSyC1amehq6MFCcA2ZyMqOjQY1v067xv7Xh0",
@@ -413,7 +413,7 @@ try {
     }
 } catch(e) { console.error('Firebase init error:', e); }
 
-// ??? State ???????????????????????????????????????
+// ─── State ───────────────────────────────────────
 let coupleCode     = null;
 let currentTab     = 'bucket';
 let data           = { bucket:{}, spot:{}, dining:{} };
@@ -424,7 +424,7 @@ let detailItem     = null;
 let detailOpen     = false;
 let toastTimer     = null;
 
-// ??? Setup ???????????????????????????????????????
+// ─── Setup ───────────────────────────────────────
 function showStep(s) {
     document.querySelectorAll('.setup-step').forEach(el => el.classList.remove('active'));
     if (s === 'create') {
@@ -445,24 +445,24 @@ function genCode() {
 
 function joinWithCode() {
     const v = document.getElementById('joinInput').value.trim();
-    if (v.length < 4) { showToast('肄붾뱶瑜??낅젰?댁＜?몄슂'); return; }
+    if (v.length < 4) { showToast('코드를 입력해주세요'); return; }
     startWithCode(v);
 }
 
 function startWithCode(code) {
-    if (!db) { showToast('Firebase ?ㅼ젙???꾩슂?⑸땲??); return; }
+    if (!db) { showToast('Firebase 설정이 필요합니다'); return; }
     coupleCode = code;
     localStorage.setItem('coupleCode', code);
     initApp();
 }
 
-// ??? App Init ???????????????????????????????????
+// ─── App Init ───────────────────────────────────
 function initApp() {
     document.getElementById('setupScreen').style.display = 'none';
     const app = document.getElementById('mainApp');
     app.style.display = 'flex';
     app.style.flexDirection = 'column';
-    document.getElementById('headerCode').textContent = '?뵎 ' + coupleCode;
+    document.getElementById('headerCode').textContent = '🔑 ' + coupleCode;
 
     db.ref('couples/' + coupleCode).on('value', snap => {
         const raw = snap.val() || {};
@@ -470,16 +470,16 @@ function initApp() {
         data.spot   = raw.spot   || {};
         data.dining = raw.dining || {};
         renderAll();
-    }, err => { showToast('?곌껐 ?ㅻ쪟: ' + err.message); });
+    }, err => { showToast('연결 오류: ' + err.message); });
 }
 
 function copyCode() {
     if (navigator.clipboard) {
-        navigator.clipboard.writeText(coupleCode).then(() => showToast('肄붾뱶 蹂듭궗?? ?뱥'));
-    } else { showToast('肄붾뱶: ' + coupleCode); }
+        navigator.clipboard.writeText(coupleCode).then(() => showToast('코드 복사됨! 📋'));
+    } else { showToast('코드: ' + coupleCode); }
 }
 
-// ??? Navigation ?????????????????????????????????
+// ─── Navigation ─────────────────────────────────
 function switchTab(tab) {
     currentTab = tab;
     document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
@@ -489,7 +489,7 @@ function switchTab(tab) {
     document.getElementById('mainContent').scrollTop = 0;
 }
 
-// ??? Render ?????????????????????????????????????
+// ─── Render ─────────────────────────────────────
 function renderAll() {
     renderList('bucket');
     renderList('spot');
@@ -502,8 +502,8 @@ function renderList(type) {
     const sorted = Object.entries(items).sort((a,b) => (b[1].dateAdded||'') > (a[1].dateAdded||'') ? 1 : -1);
 
     if (!sorted.length) {
-        const icons = {bucket:'?뙚', spot:'?뿺截?, dining:'?뜶'};
-        const msgs  = {bucket:'泥?踰덉㎏ 踰꾪궥由ъ뒪?몃?\n異붽??대낫?몄슂!', spot:'媛怨??띠? ?μ냼瑜?n異붽??대낫?몄슂!', dining:'媛怨??띠? 留쏆쭛??n異붽??대낫?몄슂!'};
+        const icons = {bucket:'🌟', spot:'🗺️', dining:'🍴'};
+        const msgs  = {bucket:'첫 번째 버킷리스트를\n추가해보세요!', spot:'가고 싶은 장소를\n추가해보세요!', dining:'가고 싶은 맛집을\n추가해보세요!'};
         el.innerHTML = `<div class="empty"><div class="empty-emoji">${icons[type]}</div><div class="empty-msg">${msgs[type]}</div></div>`;
         return;
     }
@@ -525,8 +525,8 @@ function itemHTML(type, id, item) {
                     ${item.description ? `<div class="item-review">${esc(item.description)}</div>` : ''}
                 </div>
                 <div style="display:flex;gap:6px;align-items:center;flex-shrink:0;">
-                    <button class="del-btn" onclick="event.stopPropagation();delItem('bucket','${id}')">??/button>
-                    <button class="check-btn${done?' done':''}" onclick="event.stopPropagation();toggleDone('${id}',${done})">${done?'??:''}</button>
+                    <button class="del-btn" onclick="event.stopPropagation();delItem('bucket','${id}')">✕</button>
+                    <button class="check-btn${done?' done':''}" onclick="event.stopPropagation();toggleDone('${id}',${done})">${done?'✓':''}</button>
                 </div>
             </div>`;
     } else {
@@ -535,11 +535,11 @@ function itemHTML(type, id, item) {
             <div class="item-row">
                 <div class="item-main">
                     <div class="item-title">${esc(item.title)}</div>
-                    <div class="item-stars">${[1,2,3,4,5].map(i => i<=r?'狩?:'??).join('')}</div>
+                    <div class="item-stars">${[1,2,3,4,5].map(i => i<=r?'⭐':'☆').join('')}</div>
                     ${item.review ? `<div class="item-review">"${esc(item.review)}"</div>` : ''}
                     <div class="item-date">${date}</div>
                 </div>
-                <button class="del-btn" style="align-self:flex-start;" onclick="event.stopPropagation();delItem('${type}','${id}')">??/button>
+                <button class="del-btn" style="align-self:flex-start;" onclick="event.stopPropagation();delItem('${type}','${id}')">✕</button>
             </div>`;
     }
 
@@ -549,10 +549,10 @@ function itemHTML(type, id, item) {
     return `<div class="list-item" onclick="openDetail('${type}','${id}')">${inner}${photos.length?`<div class="item-photos">${thumbs}${more}</div>`:''}</div>`;
 }
 
-// ??? Add Modal ??????????????????????????????????
+// ─── Add Modal ──────────────────────────────────
 function openAdd(type) {
     addType = type;
-    const labels = {bucket:'踰꾪궥 異붽? ?뙚', spot:'?ㅽ뙚 異붽? ?뱧', dining:'留쏆쭛 異붽? ?띂截?};
+    const labels = {bucket:'버킷 추가 🌟', spot:'스팟 추가 📍', dining:'맛집 추가 🍽️'};
     document.getElementById('addTitle').textContent = labels[type];
     document.getElementById('addInput').value = '';
     document.getElementById('addOverlay').classList.add('open');
@@ -563,16 +563,16 @@ function closeAdd() { document.getElementById('addOverlay').classList.remove('op
 
 function confirmAdd() {
     const title = document.getElementById('addInput').value.trim();
-    if (!title) { showToast('?쒕ぉ???낅젰?댁＜?몄슂'); return; }
+    if (!title) { showToast('제목을 입력해주세요'); return; }
     const id = Date.now().toString();
     db.ref('couples/' + coupleCode + '/' + addType + '/' + id).set({
         title, dateAdded:new Date().toISOString(),
         completed:false, description:'', review:'', rating:0, photos:[]
-    }).then(() => showToast('異붽??먯뼱?? ??)).catch(() => showToast('?ㅻ쪟媛 諛쒖깮?덉뼱??));
+    }).then(() => showToast('추가됐어요! ✨')).catch(() => showToast('오류가 발생했어요'));
     closeAdd();
 }
 
-// ??? Detail Modal ???????????????????????????????
+// ─── Detail Modal ───────────────────────────────
 function openDetail(type, id) {
     detailType = type;
     detailId   = id;
@@ -589,8 +589,8 @@ function renderDetail() {
 
     const photoGrid = `
         <div class="photo-grid">
-            ${photos.map((p,i) => `<div class="photo-wrap"><img src="${p}" alt=""><button class="photo-del" onclick="removePhoto(${i})">??/button></div>`).join('')}
-            <div class="add-photo" onclick="pickPhoto()"><span>+</span><span>?ъ쭊</span></div>
+            ${photos.map((p,i) => `<div class="photo-wrap"><img src="${p}" alt=""><button class="photo-del" onclick="removePhoto(${i})">✕</button></div>`).join('')}
+            <div class="add-photo" onclick="pickPhoto()"><span>+</span><span>사진</span></div>
         </div>`;
 
     let html = '';
@@ -599,32 +599,32 @@ function renderDetail() {
         html = `
             <div class="sheet-title">${esc(it.title)}</div>
             <div class="check-row" onclick="toggleDetailDone()">
-                <div class="check-circle${done?' done':''}" id="dCircle">${done?'??:''}</div>
-                <span class="check-lbl" id="dLabel">${done?'?꾨즺?덉뼱?? ?럦':'?꾩쭅 ?꾨즺 ?꾩씠?먯슂'}</span>
+                <div class="check-circle${done?' done':''}" id="dCircle">${done?'✓':''}</div>
+                <span class="check-lbl" id="dLabel">${done?'완료했어요! 🎉':'아직 완료 전이에요'}</span>
             </div>
-            <label class="form-label">硫붾え ?뱷</label>
-            <textarea class="form-textarea" id="dDesc" placeholder="湲곕줉???④꺼蹂댁꽭??.." oninput="detailItem.description=this.value">${esc(it.description||'')}</textarea>
-            <label class="form-label">?ъ쭊 ?벝</label>
+            <label class="form-label">메모 📝</label>
+            <textarea class="form-textarea" id="dDesc" placeholder="기록을 남겨보세요..." oninput="detailItem.description=this.value">${esc(it.description||'')}</textarea>
+            <label class="form-label">사진 📸</label>
             ${photoGrid}
             <div class="action-row">
-                <button class="save-btn" onclick="saveDetail()">??ν븯湲??뮶</button>
-                <button class="del-action-btn" onclick="deleteDetail()">??젣</button>
+                <button class="save-btn" onclick="saveDetail()">저장하기 💾</button>
+                <button class="del-action-btn" onclick="deleteDetail()">삭제</button>
             </div>`;
     } else {
         const r = it.rating || 0;
         html = `
             <div class="sheet-title">${esc(it.title)}</div>
-            <label class="form-label">?됱젏 狩?/label>
+            <label class="form-label">평점 ⭐</label>
             <div class="star-wrap" id="starWrap">
-                ${[1,2,3,4,5].map(i => `<button class="star-btn" onclick="setRating(${i})">${i<=r?'狩?:'??}</button>`).join('')}
+                ${[1,2,3,4,5].map(i => `<button class="star-btn" onclick="setRating(${i})">${i<=r?'⭐':'☆'}</button>`).join('')}
             </div>
-            <label class="form-label">?쒖쨪???랃툘</label>
-            <input type="text" class="form-input" id="dReview" placeholder="??以??뚭컧???④꺼蹂댁꽭?? value="${esc(it.review||'')}" oninput="detailItem.review=this.value">
-            <label class="form-label">?ъ쭊 ?벝</label>
+            <label class="form-label">한줄평 ✍️</label>
+            <input type="text" class="form-input" id="dReview" placeholder="한 줄 소감을 남겨보세요" value="${esc(it.review||'')}" oninput="detailItem.review=this.value">
+            <label class="form-label">사진 📸</label>
             ${photoGrid}
             <div class="action-row">
-                <button class="save-btn" onclick="saveDetail()">??ν븯湲??뮶</button>
-                <button class="del-action-btn" onclick="deleteDetail()">??젣</button>
+                <button class="save-btn" onclick="saveDetail()">저장하기 💾</button>
+                <button class="del-action-btn" onclick="deleteDetail()">삭제</button>
             </div>`;
     }
     document.getElementById('detailContent').innerHTML = html;
@@ -638,14 +638,14 @@ function closeDetail() {
 function toggleDetailDone() {
     detailItem.completed = !detailItem.completed;
     const c = document.getElementById('dCircle'), l = document.getElementById('dLabel');
-    if (c) { c.className = 'check-circle' + (detailItem.completed?' done':''); c.textContent = detailItem.completed?'??:''; }
-    if (l) { l.textContent = detailItem.completed ? '?꾨즺?덉뼱?? ?럦' : '?꾩쭅 ?꾨즺 ?꾩씠?먯슂'; }
+    if (c) { c.className = 'check-circle' + (detailItem.completed?' done':''); c.textContent = detailItem.completed?'✓':''; }
+    if (l) { l.textContent = detailItem.completed ? '완료했어요! 🎉' : '아직 완료 전이에요'; }
 }
 
 function setRating(n) {
     detailItem.rating = n;
     const w = document.getElementById('starWrap');
-    if (w) w.innerHTML = [1,2,3,4,5].map(i => `<button class="star-btn" onclick="setRating(${i})">${i<=n?'狩?:'??}</button>`).join('');
+    if (w) w.innerHTML = [1,2,3,4,5].map(i => `<button class="star-btn" onclick="setRating(${i})">${i<=n?'⭐':'☆'}</button>`).join('');
 }
 
 function saveDetail() {
@@ -656,39 +656,39 @@ function saveDetail() {
         completed:   detailItem.completed   || false,
         photos:      detailItem.photos      || []
     }).then(() => {
-        showToast('??λ릱?댁슂! ?뮶');
+        showToast('저장됐어요! 💾');
         closeDetail();
-    }).catch(() => showToast('????ㅻ쪟'));
+    }).catch(() => showToast('저장 오류'));
 }
 
 function deleteDetail() {
-    if (!confirm('??젣?좉퉴??')) return;
+    if (!confirm('삭제할까요?')) return;
     db.ref('couples/' + coupleCode + '/' + detailType + '/' + detailId).remove()
-        .then(() => { showToast('??젣?먯뼱??); closeDetail(); });
+        .then(() => { showToast('삭제됐어요'); closeDetail(); });
 }
 
-// ??? Quick Actions ??????????????????????????????
+// ─── Quick Actions ──────────────────────────────
 function toggleDone(id, current) {
     db.ref('couples/' + coupleCode + '/bucket/' + id + '/completed').set(!current);
 }
 
 function delItem(type, id) {
-    if (!confirm('??젣?좉퉴??')) return;
+    if (!confirm('삭제할까요?')) return;
     db.ref('couples/' + coupleCode + '/' + type + '/' + id).remove()
-        .then(() => showToast('??젣?먯뼱??));
+        .then(() => showToast('삭제됐어요'));
 }
 
-// ??? Photos ?????????????????????????????????????
+// ─── Photos ─────────────────────────────────────
 function pickPhoto() { document.getElementById('photoInput').click(); }
 
 function onPhotoFile(e) {
     const file = e.target.files[0]; if (!file) return;
     e.target.value = '';
-    showToast('?ъ쭊 異붽? 以?..');
+    showToast('사진 추가 중...');
     compressImg(file).then(b64 => {
         detailItem.photos.push(b64);
         renderDetail();
-        showToast('?ъ쭊 異붽????벝');
+        showToast('사진 추가됨 📸');
     });
 }
 
@@ -716,7 +716,7 @@ function compressImg(file, maxW=500, q=0.65) {
     });
 }
 
-// ??? Utils ??????????????????????????????????????
+// ─── Utils ──────────────────────────────────────
 function esc(s) {
     if (!s) return '';
     return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
@@ -729,12 +729,12 @@ function showToast(msg) {
     toastTimer = setTimeout(() => t.classList.remove('show'), 2300);
 }
 
-// ??? Start ??????????????????????????????????????
+// ─── Start ──────────────────────────────────────
 window.addEventListener('load', () => {
     if (!db) {
         const w = document.createElement('div');
         w.className = 'warn-box';
-        w.innerHTML = '?좑툘 <b>Firebase ?ㅼ젙 ?꾩슂</b><br>index.html ?뚯씪??firebaseConfig 媛믪쓣 Firebase 肄섏넄?먯꽌 蹂듭궗???ㅼ젣 媛믪쑝濡?援먯껜?댁＜?몄슂.';
+        w.innerHTML = '⚠️ <b>Firebase 설정 필요</b><br>index.html 파일의 firebaseConfig 값을 Firebase 콘솔에서 복사한 실제 값으로 교체해주세요.';
         document.getElementById('setupScreen').insertBefore(w, document.querySelector('.setup-logo'));
     }
 
@@ -744,7 +744,7 @@ window.addEventListener('load', () => {
     }
 });
 
-// ?? ?꾩씠肄??숈쟻 ?앹꽦 (罹붾쾭?ㅻ줈 PNG ?앹꽦) ??
+// ── 아이콘 동적 생성 (캔버스로 PNG 생성) ──
 (function() {
     try {
         const c = document.createElement('canvas');
@@ -769,7 +769,7 @@ window.addEventListener('load', () => {
     } catch(e) {}
 })();
 
-// ?? 留ㅻ땲?섏뒪???숈쟻 ?앹꽦 ??
+// ── 매니페스트 동적 생성 ──
 (function() {
     try {
         const m = { name:'list', short_name:'list', start_url:'./', display:'standalone',
@@ -781,7 +781,7 @@ window.addEventListener('load', () => {
     } catch(e) {}
 })();
 
-// ?? ?쒕퉬???뚯빱 (?몃씪??釉붾∼) ??
+// ── 서비스 워커 (인라인 블롭) ──
 if ('serviceWorker' in navigator) {
     try {
         const sw = `self.addEventListener('install',()=>self.skipWaiting());self.addEventListener('activate',e=>e.waitUntil(self.clients.claim()));`;
