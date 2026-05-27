@@ -148,6 +148,11 @@
         .item-photos { display:flex; gap:5px; margin-top:8px; overflow:hidden; }
         .item-thumb { width:52px; height:52px; border-radius:10px; object-fit:cover; flex-shrink:0; }
 
+        /* Side photos (spot / dining) */
+        .item-side-photos { display:flex; flex-direction:column; gap:4px; flex-shrink:0; }
+        .item-thumb-side { width:60px; height:60px; border-radius:10px; object-fit:cover; flex-shrink:0; display:block; }
+        .side-more { width:60px; height:60px; border-radius:10px; background:#f5f5f5; display:flex; align-items:center; justify-content:center; font-size:11px; color:#aaa; flex-shrink:0; }
+
         .check-btn {
             width:26px; height:26px; border-radius:50%; border:2.5px solid var(--pink-light);
             background:none; cursor:pointer; display:flex; align-items:center; justify-content:center;
@@ -541,22 +546,32 @@ function itemHTML(type, id, item) {
             <div class="item-footer"><span class="item-date">${date}</span></div>`;
     } else {
         const r = item.rating || 0;
+        const sidePhotos = photos.length
+            ? `<div class="item-side-photos">
+                ${photos.slice(0,2).map(p => `<img class="item-thumb-side" src="${p}" alt="">`).join('')}
+                ${photos.length > 2 ? `<div class="side-more">+${photos.length-2}</div>` : ''}
+               </div>` : '';
         inner = `
-            <div class="item-row">
+            <div class="item-row" style="align-items:stretch;">
                 <div class="item-main">
                     <div class="item-title">${esc(item.title)}</div>
                     <div class="item-stars">${[1,2,3,4,5].map(i => i<=r?'⭐':'☆').join('')}</div>
                     ${item.review ? `<div class="item-review">"${esc(item.review)}"</div>` : ''}
-                    <div class="item-date">${date}</div>
+                    <div class="item-footer"><span class="item-date">${date}</span></div>
                 </div>
-                <button class="del-btn" style="align-self:flex-start;" onclick="event.stopPropagation();delItem('${type}','${id}')">✕</button>
+                <div style="display:flex;flex-direction:column;align-items:flex-end;flex-shrink:0;gap:4px;">
+                    <button class="del-btn" onclick="event.stopPropagation();delItem('${type}','${id}')">✕</button>
+                    ${sidePhotos}
+                </div>
             </div>`;
     }
 
-    const thumbs = photos.slice(0,3).map(p => `<img class="item-thumb" src="${p}" alt="">`).join('');
-    const more   = photos.length > 3 ? `<div class="item-thumb" style="background:#f0f0f0;display:flex;align-items:center;justify-content:center;font-size:12px;color:#888;border-radius:10px;">+${photos.length-3}</div>` : '';
+    // bucket: photos below / spot+dining: photos already on the right inside inner
+    const bottomPhotos = (type === 'bucket' && photos.length)
+        ? `<div class="item-photos">${photos.slice(0,3).map(p=>`<img class="item-thumb" src="${p}" alt="">`).join('')}${photos.length>3?`<div class="item-thumb" style="background:#f0f0f0;display:flex;align-items:center;justify-content:center;font-size:12px;color:#888;border-radius:10px;">+${photos.length-3}</div>`:''}</div>`
+        : '';
 
-    return `<div class="list-item" onclick="openDetail('${type}','${id}')">${inner}${photos.length?`<div class="item-photos">${thumbs}${more}</div>`:''}</div>`;
+    return `<div class="list-item" onclick="openDetail('${type}','${id}')">${inner}${bottomPhotos}</div>`;
 }
 
 // ─── Add Modal ──────────────────────────────────
