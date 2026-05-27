@@ -546,20 +546,21 @@ function itemHTML(type, id, item) {
             <div class="item-footer"><span class="item-date">${date}</span></div>`;
     } else {
         const r = item.rating || 0;
-        const titlePhotos = photos.length
-            ? photos.slice(0,3).map(p => `<img style="width:72px;height:72px;flex-shrink:0;border-radius:10px;object-fit:cover;" src="${p}" alt="">`).join('') +
-              (photos.length > 3 ? `<span style="font-size:11px;color:#aaa;align-self:center;flex-shrink:0;">+${photos.length-3}</span>` : '')
+        const floatPhotos = photos.length
+            ? `<div style="float:right;display:flex;gap:4px;margin-left:10px;">` +
+              photos.slice(0,3).map(p => `<img style="width:72px;height:72px;border-radius:10px;object-fit:cover;" src="${p}" alt="">`).join('') +
+              (photos.length > 3 ? `<span style="font-size:11px;color:#aaa;align-self:center;">+${photos.length-3}</span>` : '') +
+              `</div>`
             : '';
         inner = `
             <div style="position:relative;padding-right:28px;width:100%;">
                 <button class="del-btn" style="position:absolute;top:0;right:0;" onclick="event.stopPropagation();delItem('${type}','${id}')">✕</button>
-                <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px;">
-                    <div class="item-title" style="flex-shrink:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${esc(item.title)}</div>
-                    ${titlePhotos}
-                </div>
+                ${floatPhotos}
+                <div class="item-title" style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;margin-bottom:4px;">${esc(item.title)}</div>
                 <div class="item-stars" style="margin-bottom:3px;">${[1,2,3,4,5].map(i => i<=r?'⭐':'☆').join('')}</div>
                 ${item.review ? `<div class="item-review">"${esc(item.review)}"</div>` : ''}
                 <div class="item-footer"><span class="item-date">${date}</span></div>
+                <div style="clear:both;"></div>
             </div>`;
     }
 
