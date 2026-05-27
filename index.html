@@ -557,13 +557,13 @@ function itemHTML(type, id, item) {
                     <div class="item-title">${esc(item.title)}</div>
                     <div class="item-stars">${[1,2,3,4,5].map(i => i<=r?'⭐':'☆').join('')}</div>
                     ${item.review ? `<div class="item-review">"${esc(item.review)}"</div>` : ''}
-                    <div class="item-footer"><span class="item-date">${date}</span></div>
                 </div>
                 <div style="display:flex;flex-direction:column;align-items:flex-end;flex-shrink:0;gap:4px;">
                     <button class="del-btn" onclick="event.stopPropagation();delItem('${type}','${id}')">✕</button>
                     ${sidePhotos}
                 </div>
-            </div>`;
+            </div>
+            <div class="item-footer"><span class="item-date">${date}</span></div>`;
     }
 
     // bucket: photos below / spot+dining: photos already on the right inside inner
