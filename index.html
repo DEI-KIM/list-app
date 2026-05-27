@@ -553,17 +553,17 @@ function itemHTML(type, id, item) {
               `</div>`
             : '';
         inner = `
-            <div style="display:flex;gap:8px;align-items:stretch;width:100%;">
-                <div style="flex:1;min-width:0;">
-                    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px;">
-                        <div class="item-title" style="min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${esc(item.title)}</div>
-                        <button class="del-btn" style="flex-shrink:0;margin-left:6px;" onclick="event.stopPropagation();delItem('${type}','${id}')">✕</button>
+            <div style="position:relative;padding-right:28px;width:100%;">
+                <button class="del-btn" style="position:absolute;top:0;right:0;" onclick="event.stopPropagation();delItem('${type}','${id}')">✕</button>
+                <div style="display:flex;gap:8px;align-items:stretch;">
+                    <div style="flex:1;min-width:0;">
+                        <div class="item-title" style="margin-bottom:4px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${esc(item.title)}</div>
+                        <div class="item-stars" style="margin-bottom:3px;">${[1,2,3,4,5].map(i => i<=r?'⭐':'☆').join('')}</div>
+                        ${item.review ? `<div class="item-review">"${esc(item.review)}"</div>` : ''}
+                        <div class="item-footer"><span class="item-date">${date}</span></div>
                     </div>
-                    <div class="item-stars" style="margin-bottom:3px;">${[1,2,3,4,5].map(i => i<=r?'⭐':'☆').join('')}</div>
-                    ${item.review ? `<div class="item-review">"${esc(item.review)}"</div>` : ''}
-                    <div class="item-footer"><span class="item-date">${date}</span></div>
+                    ${sidePhotos}
                 </div>
-                ${sidePhotos}
             </div>`;
     }
 
