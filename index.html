@@ -294,6 +294,56 @@
             width:100%;
         }
 
+        /* ======= ESTATE ======= */
+        .estate-cat-item {
+            background:#fff; border-radius:18px; padding:14px 16px;
+            margin-bottom:10px; border:1px solid var(--border);
+            cursor:pointer; display:flex; align-items:center; gap:14px; transition:all .18s;
+        }
+        .estate-cat-item:active { transform:scale(.975); }
+        .estate-progress { font-size:11px; color:var(--gray); margin-top:2px; }
+        .estate-progress-bar { height:4px; background:var(--border); border-radius:2px; margin-top:6px; overflow:hidden; }
+        .estate-progress-fill { height:100%; background:var(--pink); border-radius:2px; transition:width .3s; }
+        .check-item {
+            display:flex; align-items:flex-start; gap:12px;
+            padding:11px 0; border-bottom:1px solid #FFF5F7; cursor:pointer;
+        }
+        .check-box {
+            width:22px; height:22px; border-radius:6px; border:2px solid var(--pink-light);
+            display:flex; align-items:center; justify-content:center;
+            flex-shrink:0; margin-top:1px; transition:all .18s; font-size:13px; color:#fff;
+        }
+        .check-box.checked { background:var(--pink); border-color:var(--pink); }
+        .check-text { font-size:14px; color:var(--text); line-height:1.5; flex:1; }
+        .check-text.checked { color:#bbb; text-decoration:line-through; }
+        .estate-note {
+            background:#FFF8FA; border:1px solid var(--border); border-radius:12px;
+            padding:10px 14px; font-size:12px; color:var(--gray); margin:12px 0; line-height:1.6;
+        }
+        .estate-section { font-size:13px; font-weight:700; color:var(--gray); margin:16px 0 8px; }
+        .chip-row { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:14px; }
+        .chip {
+            padding:7px 15px; border-radius:20px; font-size:13px;
+            border:1.5px solid var(--border); background:#fff; cursor:pointer;
+            transition:all .18s; color:var(--text);
+        }
+        .chip.selected { background:var(--pink); border-color:var(--pink); color:#fff; }
+        .num-input-row { display:flex; align-items:center; gap:10px; margin:6px 0 12px; }
+        .num-input-label { font-size:14px; font-weight:600; color:var(--text); flex:1; }
+        .num-input {
+            width:72px; padding:8px 10px; border:1.5px solid var(--border);
+            border-radius:10px; font-size:16px; font-weight:700; text-align:center;
+            outline:none; font-family:inherit; background:var(--bg); color:var(--text);
+        }
+        .num-input:focus { border-color:var(--pink); }
+        .num-unit { font-size:13px; color:var(--gray); }
+        .estate-reset-btn {
+            background:none; border:1.5px solid var(--border); color:var(--gray);
+            border-radius:10px; padding:6px 14px; font-size:13px; cursor:pointer;
+            font-family:inherit; transition:all .18s;
+        }
+        .estate-reset-btn:active { background:var(--border); }
+
         /* ======= TRIP ======= */
         .trip-view { display:none; }
         .trip-view.active { display:block; }
@@ -392,6 +442,24 @@
             <div id="dining-list"></div>
         </div>
 
+        <!-- Estate -->
+        <div class="tab-panel" id="tab-estate">
+            <div class="trip-view active" id="estate-view-list">
+                <div class="panel-header">
+                    <span class="panel-title">🏠 Estate</span>
+                    <button class="estate-reset-btn" onclick="estateReset()">초기화</button>
+                </div>
+                <div id="estate-cat-list"></div>
+            </div>
+            <div class="trip-view" id="estate-view-detail">
+                <div class="trip-sub-header">
+                    <button class="back-btn" onclick="backToEstateList()">←</button>
+                    <span class="panel-title" id="estate-detail-title" style="flex:1;"></span>
+                </div>
+                <div id="estate-detail-content"></div>
+            </div>
+        </div>
+
         <!-- Trip -->
         <div class="tab-panel" id="tab-trip">
             <!-- Trip list view -->
@@ -442,6 +510,10 @@
         <button class="nav-btn" id="nav-trip" onclick="switchTab('trip')">
             <span class="nav-icon">✈️</span>
             <span class="nav-label">Trip</span>
+        </button>
+        <button class="nav-btn" id="nav-estate" onclick="switchTab('estate')">
+            <span class="nav-icon">🏠</span>
+            <span class="nav-label">Estate</span>
         </button>
     </nav>
 </div>
@@ -529,6 +601,8 @@ let data           = { bucket:{}, spot:{}, dining:{} };
 let tripData       = {};
 let currentTripId  = null;
 let currentDayId   = null;
+let estateData     = { checks:{}, extras:{} };
+let currentEstateCat = null;
 let addType        = null;
 let detailType     = null;
 let detailId       = null;
@@ -582,8 +656,10 @@ function initApp() {
         data.spot   = raw.spot   || {};
         data.dining = raw.dining || {};
         tripData    = raw.trip   || {};
+        estateData  = { checks: (raw.estate||{}).checks||{}, extras: (raw.estate||{}).extras||{} };
         renderAll();
         if (currentTab === 'trip') renderCurrentTripView();
+        if (currentTab === 'estate') renderCurrentEstateView();
     }, err => { showToast('연결 오류: ' + err.message); });
 }
 
@@ -602,6 +678,7 @@ function switchTab(tab) {
     document.getElementById('nav-' + tab).classList.add('active');
     document.getElementById('mainContent').scrollTop = 0;
     if (tab === 'trip') renderCurrentTripView();
+    if (tab === 'estate') renderCurrentEstateView();
 }
 
 // ─── Render ─────────────────────────────────────
@@ -840,6 +917,225 @@ function compressImg(file, maxW=500, q=0.65) {
             img.src = ev.target.result;
         };
         r.readAsDataURL(file);
+    });
+}
+
+// ─── Estate ──────────────────────────────────────────────────────
+const ESTATE_DATA = [
+    { id:'street', icon:'🏘️', title:'거리 분위기',
+      items:[
+        {id:'st1',text:'거리 전체가 깨끗한 편인가'},
+        {id:'st2',text:'오래된 건물이 많아도 관리가 잘 되어 있는가'},
+        {id:'st3',text:'불법 주정차가 심하지 않은가'},
+        {id:'st4',text:'쓰레기나 담배꽁초가 많은가'},
+        {id:'st5',text:'골목 분위기가 밝고 쾌적한가'},
+        {id:'st6',text:'밤에도 안전해 보이는가'},
+      ],
+      extras:[
+        {type:'memo', id:'st_m1', label:'첫인상'},
+        {type:'memo', id:'st_m2', label:'밤 분위기 예상'},
+      ]
+    },
+    { id:'resident', icon:'👥', title:'주민 분위기',
+      items:[
+        {id:'re1',text:'유모차, 아이를 데리고 나온 가족이 많은가'},
+        {id:'re2',text:'중장년층 위주인지, 젊은층이 많은지'},
+        {id:'re3',text:'학원이나 어린이 시설이 많은가'},
+        {id:'re4',text:'카페, 브런치 가게 등 소비력이 느껴지는 상권인가'},
+        {id:'re5',text:'주민들이 동네를 오래 거주하는 느낌인가'},
+      ],
+      extras:[
+        {type:'chips', id:'re_type', label:'체감', options:['👶 아이 많음','👩‍💼 직장인 많음','👴 고령층 많음']},
+        {type:'stars', id:'re_vibe', label:'활기'},
+      ]
+    },
+    { id:'commerce', icon:'🛒', title:'상권 체크',
+      items:[
+        {id:'co1',text:'대형마트가 가까운가'},
+        {id:'co2',text:'편의점 밀집도가 적당한가'},
+        {id:'co3',text:'프랜차이즈 카페가 있는가'},
+        {id:'co4',text:'병원·약국이 충분한가'},
+        {id:'co5',text:'은행·생활 편의시설이 가까운가'},
+        {id:'co6',text:'상권 공실이 많은가'},
+      ],
+      note:'빈 상가가 많으면 상권이 약해지고 있는 신호일 수 있음.'
+    },
+    { id:'transport', icon:'🚇', title:'교통 체크',
+      items:[
+        {id:'tr1',text:'지하철역까지 실제 걸어보기'},
+        {id:'tr2',text:'언덕이 심하지 않은가'},
+        {id:'tr3',text:'버스 노선이 많은가'},
+        {id:'tr4',text:'출퇴근 시간 차량 정체가 심한가'},
+        {id:'tr5',text:'큰 도로 접근성이 좋은가'},
+      ],
+      extras:[
+        {type:'input_num', id:'tr_sta', label:'역까지', unit:'분'},
+        {type:'input_num', id:'tr_bus', label:'버스정류장', unit:'분'},
+      ]
+    },
+    { id:'noise', icon:'🔊', title:'소음 체크',
+      items:[
+        {id:'no1',text:'대로변 차량 소음'},
+        {id:'no2',text:'오토바이 통행량'},
+        {id:'no3',text:'유흥가 소음'},
+        {id:'no4',text:'비행기/철도 소음'},
+        {id:'no5',text:'공사장 소음'},
+      ]
+    },
+    { id:'future', icon:'📈', title:'미래 가치 체크',
+      items:[
+        {id:'fu1',text:'신축 아파트가 계속 들어오고 있는가'},
+        {id:'fu2',text:'재개발·재건축 분위기가 있는가'},
+        {id:'fu3',text:'주변에 대형 개발 호재가 있는가'},
+        {id:'fu4',text:'학교, 공원, 문화시설이 늘어나고 있는가'},
+      ]
+    }
+];
+
+function renderCurrentEstateView() {
+    const active = document.activeElement;
+    if (active && (active.tagName==='INPUT'||active.tagName==='TEXTAREA')
+        && document.getElementById('tab-estate') && document.getElementById('tab-estate').contains(active)) return;
+    if (currentEstateCat) renderEstateCatDetail(currentEstateCat);
+    else renderEstateCatList();
+}
+
+function renderEstateCatList() {
+    currentEstateCat = null;
+    document.querySelectorAll('#tab-estate .trip-view').forEach(v => v.classList.remove('active'));
+    document.getElementById('estate-view-list').classList.add('active');
+    document.getElementById('mainContent').scrollTop = 0;
+    const el = document.getElementById('estate-cat-list');
+    el.innerHTML = ESTATE_DATA.map(cat => {
+        const total   = cat.items.length;
+        const checked = cat.items.filter(it => estateData.checks[it.id]).length;
+        const pct     = total > 0 ? Math.round(checked/total*100) : 0;
+        return `<div class="estate-cat-item" onclick="openEstateCat('${cat.id}')">
+            <span style="font-size:28px;">${cat.icon}</span>
+            <div style="flex:1;min-width:0;">
+                <div class="item-title">${cat.title}</div>
+                <div class="estate-progress">${checked}/${total} 완료</div>
+                <div class="estate-progress-bar"><div class="estate-progress-fill" style="width:${pct}%;"></div></div>
+            </div>
+            <span style="font-size:20px;color:var(--gray);">›</span>
+        </div>`;
+    }).join('');
+}
+
+function openEstateCat(catId) {
+    currentEstateCat = catId;
+    renderEstateCatDetail(catId);
+}
+
+function backToEstateList() { renderEstateCatList(); }
+
+function renderEstateCatDetail(catId) {
+    document.querySelectorAll('#tab-estate .trip-view').forEach(v => v.classList.remove('active'));
+    document.getElementById('estate-view-detail').classList.add('active');
+    document.getElementById('mainContent').scrollTop = 0;
+    const cat = ESTATE_DATA.find(c => c.id === catId);
+    if (!cat) return;
+    document.getElementById('estate-detail-title').textContent = cat.icon + ' ' + cat.title;
+
+    let html = '';
+    cat.items.forEach(item => {
+        const chk = !!estateData.checks[item.id];
+        html += `<div class="check-item" data-cid="${item.id}" onclick="toggleEstateCheck('${item.id}')">
+            <div class="check-box${chk?' checked':''}">${chk?'✓':''}</div>
+            <div class="check-text${chk?' checked':''}">${esc(item.text)}</div>
+        </div>`;
+    });
+
+    if (cat.note) html += `<div class="estate-note">💡 ${esc(cat.note)}</div>`;
+
+    if (cat.extras) {
+        cat.extras.forEach(ex => {
+            if (ex.type === 'memo') {
+                const val = estateData.extras[ex.id] || '';
+                html += `<div class="estate-section">${esc(ex.label)}</div>
+                    <input type="text" class="form-input" placeholder="${esc(ex.label)} 입력..."
+                        value="${esc(val)}"
+                        oninput="saveEstateExtra('${ex.id}',this.value)"
+                        onclick="event.stopPropagation()">`;
+            } else if (ex.type === 'chips') {
+                const selStr = estateData.extras[ex.id] || '';
+                const selArr = selStr ? selStr.split(',') : [];
+                html += `<div class="estate-section">${esc(ex.label)}</div>
+                    <div class="chip-row" id="chip-row-${ex.id}">
+                        ${ex.options.map((opt,i) =>
+                            `<div class="chip${selArr.includes(opt)?' selected':''}" onclick="toggleEstateChip('${ex.id}',${i})">${opt}</div>`
+                        ).join('')}
+                    </div>`;
+            } else if (ex.type === 'stars') {
+                const r = parseInt(estateData.extras[ex.id]) || 0;
+                html += `<div class="estate-section">${esc(ex.label)}</div>
+                    <div class="star-wrap" id="estate-stars-${ex.id}">
+                        ${[1,2,3,4,5].map(i => `<button class="star-btn" onclick="setEstateStars('${ex.id}',${i})">${i<=r?'⭐':'☆'}</button>`).join('')}
+                    </div>`;
+            } else if (ex.type === 'input_num') {
+                const val = estateData.extras[ex.id] || '';
+                html += `<div class="num-input-row">
+                    <div class="num-input-label">${esc(ex.label)}</div>
+                    <input type="number" class="num-input" min="0" max="999" value="${esc(val)}"
+                        oninput="saveEstateExtra('${ex.id}',this.value)"
+                        onclick="event.stopPropagation()">
+                    <span class="num-unit">${esc(ex.unit)}</span>
+                </div>`;
+            }
+        });
+    }
+    html += `<div style="height:20px;"></div>`;
+    document.getElementById('estate-detail-content').innerHTML = html;
+}
+
+function toggleEstateCheck(itemId) {
+    const newVal = !estateData.checks[itemId];
+    estateData.checks[itemId] = newVal;
+    db.ref('couples/' + coupleCode + '/estate/checks/' + itemId).set(newVal);
+    const el = document.querySelector('[data-cid="' + itemId + '"]');
+    if (el) {
+        const box = el.querySelector('.check-box'), txt = el.querySelector('.check-text');
+        if (box) { box.className='check-box'+(newVal?' checked':''); box.textContent=newVal?'✓':''; }
+        if (txt) { txt.className='check-text'+(newVal?' checked':''); }
+    }
+}
+
+function saveEstateExtra(extraId, value) {
+    estateData.extras[extraId] = value;
+    db.ref('couples/' + coupleCode + '/estate/extras/' + extraId).set(value);
+}
+
+function toggleEstateChip(extraId, optIdx) {
+    const cat = ESTATE_DATA.find(c => c.id === currentEstateCat);
+    const ex  = (cat?.extras||[]).find(e => e.id === extraId);
+    if (!ex) return;
+    const optVal  = ex.options[optIdx];
+    const selStr  = estateData.extras[extraId] || '';
+    const selArr  = selStr ? selStr.split(',') : [];
+    const idx     = selArr.indexOf(optVal);
+    if (idx >= 0) selArr.splice(idx, 1); else selArr.push(optVal);
+    const newVal  = selArr.join(',');
+    saveEstateExtra(extraId, newVal);
+    const row = document.getElementById('chip-row-' + extraId);
+    if (row) row.innerHTML = ex.options.map((opt,i) =>
+        `<div class="chip${selArr.includes(opt)?' selected':''}" onclick="toggleEstateChip('${extraId}',${i})">${opt}</div>`
+    ).join('');
+}
+
+function setEstateStars(extraId, n) {
+    saveEstateExtra(extraId, n);
+    const el = document.getElementById('estate-stars-' + extraId);
+    if (el) el.innerHTML = [1,2,3,4,5].map(i =>
+        `<button class="star-btn" onclick="setEstateStars('${extraId}',${i})">${i<=n?'⭐':'☆'}</button>`
+    ).join('');
+}
+
+function estateReset() {
+    if (!confirm('모든 체크리스트를 초기화할까요?')) return;
+    estateData = { checks:{}, extras:{} };
+    db.ref('couples/' + coupleCode + '/estate').remove().then(() => {
+        showToast('초기화됐어요 🔄');
+        renderEstateCatList();
     });
 }
 
