@@ -444,16 +444,26 @@
 
         <!-- Estate -->
         <div class="tab-panel" id="tab-estate">
-            <div class="trip-view active" id="estate-view-list">
+            <!-- 1단계: 지역 목록 -->
+            <div class="trip-view active" id="estate-view-locs">
                 <div class="panel-header">
                     <span class="panel-title">🏠 Estate</span>
-                    <button class="estate-reset-btn" onclick="estateReset()">초기화</button>
+                    <button class="plus-btn" onclick="addEstateLoc()">+</button>
+                </div>
+                <div id="estate-loc-list"></div>
+            </div>
+            <!-- 2단계: 카테고리 목록 -->
+            <div class="trip-view" id="estate-view-cats">
+                <div class="trip-sub-header">
+                    <button class="back-btn" onclick="backToEstateLocList()">←</button>
+                    <span class="panel-title" id="estate-cats-title" style="flex:1;"></span>
                 </div>
                 <div id="estate-cat-list"></div>
             </div>
+            <!-- 3단계: 카테고리 상세 -->
             <div class="trip-view" id="estate-view-detail">
                 <div class="trip-sub-header">
-                    <button class="back-btn" onclick="backToEstateList()">←</button>
+                    <button class="back-btn" onclick="backToEstateCats()">←</button>
                     <span class="panel-title" id="estate-detail-title" style="flex:1;"></span>
                 </div>
                 <div id="estate-detail-content"></div>
@@ -601,8 +611,9 @@ let data           = { bucket:{}, spot:{}, dining:{} };
 let tripData       = {};
 let currentTripId  = null;
 let currentDayId   = null;
-let estateData     = { checks:{}, extras:{} };
-let currentEstateCat = null;
+let estateData       = {};   // { locId: { title, dateAdded, checks:{}, extras:{} } }
+let currentEstateLocId = null;
+let currentEstateCat   = null;
 let addType        = null;
 let detailType     = null;
 let detailId       = null;
@@ -656,7 +667,7 @@ function initApp() {
         data.spot   = raw.spot   || {};
         data.dining = raw.dining || {};
         tripData    = raw.trip   || {};
-        estateData  = { checks: (raw.estate||{}).checks||{}, extras: (raw.estate||{}).extras||{} };
+        estateData  = raw.estate || {};
         renderAll();
         if (currentTab === 'trip') renderCurrentTripView();
         if (currentTab === 'estate') renderCurrentEstateView();
@@ -992,29 +1003,105 @@ const ESTATE_DATA = [
     }
 ];
 
+// ── helpers ──────────────────────────────────────────────────────
+function estateLocRef(locId) {
+    return db.ref('couples/' + coupleCode + '/estate/' + locId);
+}
+function locChecks(locId)  { return (estateData[locId]||{}).checks  || {}; }
+function locExtras(locId)  { return (estateData[locId]||{}).extras  || {}; }
+
+// ── view router ──────────────────────────────────────────────────
 function renderCurrentEstateView() {
     const active = document.activeElement;
     if (active && (active.tagName==='INPUT'||active.tagName==='TEXTAREA')
-        && document.getElementById('tab-estate') && document.getElementById('tab-estate').contains(active)) return;
-    if (currentEstateCat) renderEstateCatDetail(currentEstateCat);
-    else renderEstateCatList();
+        && document.getElementById('tab-estate')?.contains(active)) return;
+    if (currentEstateCat && currentEstateLocId) renderEstateCatDetail(currentEstateCat);
+    else if (currentEstateLocId) renderEstateCatList(currentEstateLocId);
+    else renderEstateLocList();
 }
 
-function renderEstateCatList() {
+// ── 1단계: 지역 목록 ─────────────────────────────────────────────
+function renderEstateLocList() {
+    currentEstateLocId = null;
+    currentEstateCat   = null;
+    document.querySelectorAll('#tab-estate .trip-view').forEach(v => v.classList.remove('active'));
+    document.getElementById('estate-view-locs').classList.add('active');
+    document.getElementById('mainContent').scrollTop = 0;
+
+    const locs = Object.entries(estateData)
+        .filter(([,v]) => v && v.title)
+        .sort((a,b) => (a[1].dateAdded||0) - (b[1].dateAdded||0));
+
+    const totalChecks = ESTATE_DATA.reduce((s,c)=>s+c.items.length, 0);
+    const el = document.getElementById('estate-loc-list');
+
+    if (locs.length === 0) {
+        el.innerHTML = `<div style="text-align:center;color:var(--gray);padding:48px 0;font-size:14px;">
+            + 버튼을 눌러 지역을 추가해보세요</div>`;
+        return;
+    }
+
+    el.innerHTML = locs.map(([locId, loc]) => {
+        const checks = locChecks(locId);
+        const done   = ESTATE_DATA.reduce((s,c)=>s+c.items.filter(it=>checks[it.id]).length, 0);
+        const pct    = Math.round(done/totalChecks*100);
+        return `<div class="estate-cat-item" onclick="openEstateLoc('${locId}')">
+            <span style="font-size:28px;">📍</span>
+            <div style="flex:1;min-width:0;">
+                <div class="item-title">${esc(loc.title)}</div>
+                <div class="estate-progress">${done}/${totalChecks} 완료</div>
+                <div class="estate-progress-bar"><div class="estate-progress-fill" style="width:${pct}%;"></div></div>
+            </div>
+            <button class="del-btn" style="position:static;margin-left:8px;"
+                onclick="event.stopPropagation();delEstateLoc('${locId}')">✕</button>
+        </div>`;
+    }).join('');
+}
+
+function addEstateLoc() {
+    const title = prompt('지역 이름을 입력하세요\n(예: 강남구 역삼동)');
+    if (!title || !title.trim()) return;
+    const locId = 'loc_' + Date.now();
+    const loc   = { title: title.trim(), dateAdded: Date.now() };
+    estateLocRef(locId).update(loc).then(() => {
+        showToast('지역이 추가됐어요 📍');
+    });
+}
+
+function delEstateLoc(locId) {
+    const title = (estateData[locId]||{}).title || '';
+    if (!confirm('"' + title + '" 지역을 삭제할까요?\n체크리스트도 모두 삭제됩니다.')) return;
+    estateLocRef(locId).remove().then(() => showToast('삭제됐어요'));
+}
+
+function openEstateLoc(locId) {
+    currentEstateLocId = locId;
+    renderEstateCatList(locId);
+}
+
+function backToEstateLocList() { renderEstateLocList(); }
+
+// ── 2단계: 카테고리 목록 ─────────────────────────────────────────
+function renderEstateCatList(locId) {
     currentEstateCat = null;
     document.querySelectorAll('#tab-estate .trip-view').forEach(v => v.classList.remove('active'));
-    document.getElementById('estate-view-list').classList.add('active');
+    document.getElementById('estate-view-cats').classList.add('active');
     document.getElementById('mainContent').scrollTop = 0;
+
+    const locTitle = (estateData[locId]||{}).title || '';
+    document.getElementById('estate-cats-title').textContent = locTitle;
+
+    const checks = locChecks(locId);
     const el = document.getElementById('estate-cat-list');
     el.innerHTML = ESTATE_DATA.map(cat => {
         const total   = cat.items.length;
-        const checked = cat.items.filter(it => estateData.checks[it.id]).length;
-        const pct     = total > 0 ? Math.round(checked/total*100) : 0;
+        const done    = cat.items.filter(it => checks[it.id]).length;
+        const pct     = total > 0 ? Math.round(done/total*100) : 0;
         return `<div class="estate-cat-item" onclick="openEstateCat('${cat.id}')">
             <span style="font-size:28px;">${cat.icon}</span>
             <div style="flex:1;min-width:0;">
                 <div class="item-title">${cat.title}</div>
-                <div class="estate-progress">${checked}/${total} 완료</div>
+                <div class="estate-progress">${done}/${total} 완료</div>
                 <div class="estate-progress-bar"><div class="estate-progress-fill" style="width:${pct}%;"></div></div>
             </div>
             <span style="font-size:20px;color:var(--gray);">›</span>
@@ -1027,8 +1114,9 @@ function openEstateCat(catId) {
     renderEstateCatDetail(catId);
 }
 
-function backToEstateList() { renderEstateCatList(); }
+function backToEstateCats() { renderEstateCatList(currentEstateLocId); }
 
+// ── 3단계: 카테고리 상세 ─────────────────────────────────────────
 function renderEstateCatDetail(catId) {
     document.querySelectorAll('#tab-estate .trip-view').forEach(v => v.classList.remove('active'));
     document.getElementById('estate-view-detail').classList.add('active');
@@ -1037,9 +1125,12 @@ function renderEstateCatDetail(catId) {
     if (!cat) return;
     document.getElementById('estate-detail-title').textContent = cat.icon + ' ' + cat.title;
 
+    const checks = locChecks(currentEstateLocId);
+    const extras = locExtras(currentEstateLocId);
+
     let html = '';
     cat.items.forEach(item => {
-        const chk = !!estateData.checks[item.id];
+        const chk = !!checks[item.id];
         html += `<div class="check-item" data-cid="${item.id}" onclick="toggleEstateCheck('${item.id}')">
             <div class="check-box${chk?' checked':''}">${chk?'✓':''}</div>
             <div class="check-text${chk?' checked':''}">${esc(item.text)}</div>
@@ -1051,14 +1142,14 @@ function renderEstateCatDetail(catId) {
     if (cat.extras) {
         cat.extras.forEach(ex => {
             if (ex.type === 'memo') {
-                const val = estateData.extras[ex.id] || '';
+                const val = extras[ex.id] || '';
                 html += `<div class="estate-section">${esc(ex.label)}</div>
                     <input type="text" class="form-input" placeholder="${esc(ex.label)} 입력..."
                         value="${esc(val)}"
                         oninput="saveEstateExtra('${ex.id}',this.value)"
                         onclick="event.stopPropagation()">`;
             } else if (ex.type === 'chips') {
-                const selStr = estateData.extras[ex.id] || '';
+                const selStr = extras[ex.id] || '';
                 const selArr = selStr ? selStr.split(',') : [];
                 html += `<div class="estate-section">${esc(ex.label)}</div>
                     <div class="chip-row" id="chip-row-${ex.id}">
@@ -1067,13 +1158,13 @@ function renderEstateCatDetail(catId) {
                         ).join('')}
                     </div>`;
             } else if (ex.type === 'stars') {
-                const r = parseInt(estateData.extras[ex.id]) || 0;
+                const r = parseInt(extras[ex.id]) || 0;
                 html += `<div class="estate-section">${esc(ex.label)}</div>
                     <div class="star-wrap" id="estate-stars-${ex.id}">
                         ${[1,2,3,4,5].map(i => `<button class="star-btn" onclick="setEstateStars('${ex.id}',${i})">${i<=r?'⭐':'☆'}</button>`).join('')}
                     </div>`;
             } else if (ex.type === 'input_num') {
-                const val = estateData.extras[ex.id] || '';
+                const val = extras[ex.id] || '';
                 html += `<div class="num-input-row">
                     <div class="num-input-label">${esc(ex.label)}</div>
                     <input type="number" class="num-input" min="0" max="999" value="${esc(val)}"
@@ -1088,10 +1179,16 @@ function renderEstateCatDetail(catId) {
     document.getElementById('estate-detail-content').innerHTML = html;
 }
 
+// ── 데이터 변경 함수 ─────────────────────────────────────────────
 function toggleEstateCheck(itemId) {
-    const newVal = !estateData.checks[itemId];
-    estateData.checks[itemId] = newVal;
-    db.ref('couples/' + coupleCode + '/estate/checks/' + itemId).set(newVal);
+    if (!currentEstateLocId) return;
+    const loc    = estateData[currentEstateLocId] || {};
+    const checks = loc.checks || {};
+    const newVal = !checks[itemId];
+    if (!estateData[currentEstateLocId]) estateData[currentEstateLocId] = { checks:{}, extras:{} };
+    estateData[currentEstateLocId].checks = estateData[currentEstateLocId].checks || {};
+    estateData[currentEstateLocId].checks[itemId] = newVal;
+    estateLocRef(currentEstateLocId).child('checks/' + itemId).set(newVal);
     const el = document.querySelector('[data-cid="' + itemId + '"]');
     if (el) {
         const box = el.querySelector('.check-box'), txt = el.querySelector('.check-text');
@@ -1101,20 +1198,23 @@ function toggleEstateCheck(itemId) {
 }
 
 function saveEstateExtra(extraId, value) {
-    estateData.extras[extraId] = value;
-    db.ref('couples/' + coupleCode + '/estate/extras/' + extraId).set(value);
+    if (!currentEstateLocId) return;
+    if (!estateData[currentEstateLocId]) estateData[currentEstateLocId] = { checks:{}, extras:{} };
+    estateData[currentEstateLocId].extras = estateData[currentEstateLocId].extras || {};
+    estateData[currentEstateLocId].extras[extraId] = value;
+    estateLocRef(currentEstateLocId).child('extras/' + extraId).set(value);
 }
 
 function toggleEstateChip(extraId, optIdx) {
-    const cat = ESTATE_DATA.find(c => c.id === currentEstateCat);
-    const ex  = (cat?.extras||[]).find(e => e.id === extraId);
+    const cat    = ESTATE_DATA.find(c => c.id === currentEstateCat);
+    const ex     = (cat?.extras||[]).find(e => e.id === extraId);
     if (!ex) return;
-    const optVal  = ex.options[optIdx];
-    const selStr  = estateData.extras[extraId] || '';
-    const selArr  = selStr ? selStr.split(',') : [];
-    const idx     = selArr.indexOf(optVal);
+    const optVal = ex.options[optIdx];
+    const selStr = locExtras(currentEstateLocId)[extraId] || '';
+    const selArr = selStr ? selStr.split(',') : [];
+    const idx    = selArr.indexOf(optVal);
     if (idx >= 0) selArr.splice(idx, 1); else selArr.push(optVal);
-    const newVal  = selArr.join(',');
+    const newVal = selArr.join(',');
     saveEstateExtra(extraId, newVal);
     const row = document.getElementById('chip-row-' + extraId);
     if (row) row.innerHTML = ex.options.map((opt,i) =>
@@ -1128,15 +1228,6 @@ function setEstateStars(extraId, n) {
     if (el) el.innerHTML = [1,2,3,4,5].map(i =>
         `<button class="star-btn" onclick="setEstateStars('${extraId}',${i})">${i<=n?'⭐':'☆'}</button>`
     ).join('');
-}
-
-function estateReset() {
-    if (!confirm('모든 체크리스트를 초기화할까요?')) return;
-    estateData = { checks:{}, extras:{} };
-    db.ref('couples/' + coupleCode + '/estate').remove().then(() => {
-        showToast('초기화됐어요 🔄');
-        renderEstateCatList();
-    });
 }
 
 // ─── Trip ────────────────────────────────────────────────────────
