@@ -142,7 +142,9 @@
         .item-title { font-size:15px; font-weight:700; color:var(--text); line-height:1.3; }
         .item-title.done { text-decoration:line-through; color:#aaa; }
         .item-date { font-size:11px; color:var(--gray); }
-        .item-footer { display:flex; justify-content:flex-end; margin-top:5px; }
+        .item-footer { display:flex; justify-content:flex-end; align-items:center; gap:6px; margin-top:5px; }
+        .map-mini-btn { background:none; border:none; font-size:14px; cursor:pointer; padding:0; line-height:1; }
+        .map-mini-btn:active { transform:scale(1.2); }
         .item-review { font-size:13px; color:var(--gray); margin-top:3px; font-style:italic; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
         .item-stars { margin-top:5px; font-size:14px; }
         .item-photos { display:flex; gap:5px; margin-top:8px; overflow:hidden; }
@@ -247,6 +249,15 @@
         }
         .add-photo span { font-size:10px; margin-top:2px; color:var(--pink-light); }
         .add-photo:active { background:var(--pink-light); }
+
+        /* Map link row */
+        .map-link-row { display:flex; gap:8px; align-items:center; margin-bottom:18px; }
+        .map-go-btn {
+            flex-shrink:0; padding:13px 16px; border-radius:14px;
+            background:var(--pink); color:#fff; border:none;
+            font-size:14px; font-weight:700; cursor:pointer; font-family:inherit; transition:all .2s;
+        }
+        .map-go-btn:active { transform:scale(.96); background:var(--pink-dark); }
 
         /* Action Row */
         .action-row { display:flex; gap:10px; margin-top:4px; padding-bottom:4px; }
@@ -745,7 +756,10 @@ function itemHTML(type, id, item) {
                 <div class="item-title" style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;margin-bottom:4px;">${esc(item.title)}</div>
                 <div class="item-stars" style="margin-bottom:3px;">${[1,2,3,4,5].map(i => i<=r?'⭐':'☆').join('')}</div>
                 ${item.review ? `<div class="item-review">"${esc(item.review)}"</div>` : ''}
-                <div class="item-footer"><span class="item-date">${date}</span></div>
+                <div class="item-footer">
+                    <span class="item-date">${date}</span>
+                    ${item.mapUrl ? `<button class="map-mini-btn" data-url="${esc(item.mapUrl)}" onclick="event.stopPropagation();openMapLink(this.dataset.url)">🗺️</button>` : ''}
+                </div>
                 <div style="clear:both;"></div>
             </div>`;
     }
@@ -779,10 +793,13 @@ function confirmAdd() {
             title, dateAdded: new Date().toISOString()
         }).then(() => showToast('여행지 추가됐어요! ✈️')).catch(() => showToast('오류'));
     } else {
-        db.ref('couples/' + coupleCode + '/' + addType + '/' + id).set({
+        const payload = {
             title, dateAdded:new Date().toISOString(),
             completed:false, description:'', review:'', rating:0, photos:[]
-        }).then(() => showToast('추가됐어요! ✨')).catch(() => showToast('오류가 발생했어요'));
+        };
+        if (addType === 'spot' || addType === 'dining') payload.mapUrl = '';
+        db.ref('couples/' + coupleCode + '/' + addType + '/' + id).set(payload)
+            .then(() => showToast('추가됐어요! ✨')).catch(() => showToast('오류가 발생했어요'));
     }
     closeAdd();
 }
@@ -840,6 +857,11 @@ function renderDetail() {
             <div class="action-row">
                 <button class="save-btn" onclick="saveDetail()">저장하기 💾</button>
                 <button class="del-action-btn" onclick="deleteDetail()">삭제</button>
+            </div>
+            <label class="form-label">지도 링크 🔗</label>
+            <div class="map-link-row">
+                <input type="text" class="form-input" id="dMapUrl" placeholder="카카오맵/구글맵 공유 링크 붙여넣기" style="flex:1;margin-bottom:0;" value="${esc(it.mapUrl||'')}" oninput="detailItem.mapUrl=this.value">
+                <button class="map-go-btn" onclick="openMapLink(detailItem.mapUrl)">이동 🚀</button>
             </div>`;
     }
     document.getElementById('detailContent').innerHTML = html;
@@ -864,16 +886,25 @@ function setRating(n) {
 }
 
 function saveDetail() {
-    db.ref('couples/' + coupleCode + '/' + detailType + '/' + detailId).update({
+    const payload = {
         description: detailItem.description || '',
         review:      detailItem.review      || '',
         rating:      detailItem.rating      || 0,
         completed:   detailItem.completed   || false,
         photos:      detailItem.photos      || []
-    }).then(() => {
+    };
+    if (detailType === 'spot' || detailType === 'dining') {
+        payload.mapUrl = detailItem.mapUrl || '';
+    }
+    db.ref('couples/' + coupleCode + '/' + detailType + '/' + detailId).update(payload).then(() => {
         showToast('저장됐어요! 💾');
         closeDetail();
     }).catch(() => showToast('저장 오류'));
+}
+
+function openMapLink(url) {
+    if (!url) { showToast('먼저 지도 링크를 입력해주세요'); return; }
+    window.open(url, '_blank');
 }
 
 function deleteDetail() {
