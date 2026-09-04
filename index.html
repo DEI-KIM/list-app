@@ -10,15 +10,16 @@
     <meta name="apple-mobile-web-app-title" content="list">
     <meta name="theme-color" content="#1E0547">
     <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link href="https://fonts.googleapis.com/css2?family=Great+Vibes&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Great+Vibes&family=Jua&display=swap" rel="stylesheet">
     <style>
         * { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
 
         :root {
-            --pink: #FF8FAB;
-            --pink-light: #FFD6E0;
-            --pink-dark: #C9596E;
-            --bg: #FFF5F7;
+            --pink: #FF2D8F;
+            --pink-light: #FFD0E8;
+            --pink-dark: #D6006F;
+            --accent-green: #3DDC5C;
+            --bg: #F1EDFB;
             --card: #FFFFFF;
             --gray: #8B95A1;
             --gray-strong: #4E5968;
@@ -99,7 +100,7 @@
             padding:calc(var(--safe-top) + 14px) 16px 14px;
             display:flex; align-items:center; justify-content:center; position:relative; flex-shrink:0;
         }
-        .header-title { font-size:20px; font-weight:800; color:#6D28D9; letter-spacing:-0.5px; }
+        .header-title { font-family:'Jua',sans-serif; font-size:22px; font-weight:400; color:var(--pink); letter-spacing:0.5px; }
         .header-code {
             position:absolute; right:14px;
             font-size:11px; font-weight:700; color:var(--pink-dark);
@@ -113,7 +114,7 @@
         .tab-panel.active { display:block; }
 
         .panel-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:14px; }
-        .panel-title { font-size:21px; font-weight:800; }
+        .panel-title { font-family:'Jua',sans-serif; font-size:22px; font-weight:400; }
 
         .plus-btn {
             width:38px; height:38px; border-radius:50%;
@@ -264,7 +265,7 @@
         /* Map link row */
         .map-link-row { display:flex; gap:8px; align-items:center; margin-bottom:18px; }
         .map-go-btn {
-            flex-shrink:0; height:48px; padding:0 16px; border-radius:14px;
+            flex-shrink:0; height:48px; padding:0 16px; border-radius:24px;
             background:var(--pink); color:#fff; border:none;
             font-size:14px; font-weight:700; cursor:pointer; font-family:inherit; transition:all .2s;
             display:flex; align-items:center; justify-content:center;
@@ -274,14 +275,14 @@
         /* Action Row */
         .action-row { display:flex; gap:10px; margin-top:4px; padding-bottom:4px; }
         .save-btn {
-            flex:1; height:48px; border-radius:14px;
+            flex:1; height:48px; border-radius:24px;
             background:var(--pink); color:#fff; border:none;
             font-size:16px; font-weight:700; cursor:pointer; font-family:inherit; transition:all .2s;
             display:flex; align-items:center; justify-content:center;
         }
         .save-btn:active { transform:scale(.97); background:var(--pink-dark); }
         .del-action-btn {
-            height:48px; padding:0 18px; border-radius:14px;
+            height:48px; padding:0 18px; border-radius:24px;
             background:#FFF0F0; color:var(--danger); border:none;
             font-size:15px; font-weight:700; cursor:pointer; font-family:inherit;
             display:flex; align-items:center; justify-content:center; transition:all .2s;
@@ -296,7 +297,7 @@
         }
         .add-input:focus { border-color:var(--pink); box-shadow:0 0 0 3px rgba(255,143,171,.15); }
         .add-confirm {
-            width:100%; height:48px; border-radius:14px;
+            width:100%; height:48px; border-radius:24px;
             background:var(--pink); color:#fff; border:none;
             font-size:16px; font-weight:700; cursor:pointer; font-family:inherit; transition:all .2s;
             display:flex; align-items:center; justify-content:center;
@@ -354,7 +355,7 @@
             border:1.5px solid var(--border); background:#fff; cursor:pointer;
             transition:all .18s; color:var(--text);
         }
-        .chip.selected { background:var(--pink); border-color:var(--pink); color:#fff; }
+        .chip.selected { background:var(--accent-green); border-color:var(--accent-green); color:#fff; }
         .num-input-row { display:flex; align-items:center; gap:10px; margin:6px 0 12px; }
         .num-input-label { font-size:14px; font-weight:600; color:var(--text); flex:1; }
         .num-input {
@@ -1603,7 +1604,7 @@ window.addEventListener('load', () => {
 (function() {
     try {
         const m = { name:'list', short_name:'list', start_url:'./', display:'standalone',
-            background_color:'#FFF5F7', theme_color:'#FF8FAB',
+            background_color:'#F1EDFB', theme_color:'#FF2D8F',
             icons:[{src:'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><defs><linearGradient id="g" x1="0" y1="0" x2="0.7" y2="1"><stop offset="0" stop-color="%230D0129"/><stop offset="0.5" stop-color="%231A0440"/><stop offset="1" stop-color="%232D0A6B"/></linearGradient></defs><rect width="512" height="512" rx="110" fill="url(%23g)"/><text x="256" y="278" text-anchor="middle" dominant-baseline="middle" font-family="Great Vibes, cursive" font-size="150" fill="%23E2D0FF">record</text></svg>',sizes:'any',type:'image/svg+xml'}]
         };
         const blob = new Blob([JSON.stringify(m)], {type:'application/manifest+json'});
