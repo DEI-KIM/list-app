@@ -894,7 +894,7 @@ function saveDetail() {
         photos:      detailItem.photos      || []
     };
     if (detailType === 'spot' || detailType === 'dining') {
-        payload.mapUrl = detailItem.mapUrl || '';
+        payload.mapUrl = extractMapUrl(detailItem.mapUrl || '');
     }
     db.ref('couples/' + coupleCode + '/' + detailType + '/' + detailId).update(payload).then(() => {
         showToast('저장됐어요! 💾');
@@ -902,9 +902,15 @@ function saveDetail() {
     }).catch(() => showToast('저장 오류'));
 }
 
+function extractMapUrl(text) {
+    const m = (text || '').match(/https?:\/\/\S+/);
+    return m ? m[0] : (text || '');
+}
+
 function openMapLink(url) {
-    if (!url) { showToast('먼저 지도 링크를 입력해주세요'); return; }
-    window.open(url, '_blank');
+    const clean = extractMapUrl(url);
+    if (!clean) { showToast('먼저 지도 링크를 입력해주세요'); return; }
+    window.open(clean, '_blank');
 }
 
 function deleteDetail() {
