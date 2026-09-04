@@ -910,7 +910,7 @@ function extractMapUrl(text) {
 function openMapLink(url) {
     const clean = extractMapUrl(url);
     if (!clean) { showToast('먼저 지도 링크를 입력해주세요'); return; }
-    window.open(clean, '_blank');
+    window.location.href = clean;
 }
 
 function deleteDetail() {
