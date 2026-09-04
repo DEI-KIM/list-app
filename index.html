@@ -1553,25 +1553,41 @@ window.addEventListener('load', () => {
 // ── 아이콘 동적 생성 (캔버스로 PNG 생성) ──
 (function() {
     try {
-        const c = document.createElement('canvas');
-        c.width = 180; c.height = 180;
-        const ctx = c.getContext('2d');
-        ctx.fillStyle = '#7C3AED';
-        const r = 36;
-        ctx.beginPath();
-        ctx.moveTo(r,0); ctx.lineTo(180-r,0); ctx.arcTo(180,0,180,r,r);
-        ctx.lineTo(180,180-r); ctx.arcTo(180,180,180-r,180,r);
-        ctx.lineTo(r,180); ctx.arcTo(0,180,0,180-r,r);
-        ctx.lineTo(0,r); ctx.arcTo(0,0,r,0,r);
-        ctx.closePath(); ctx.fill();
-        ctx.fillStyle = 'white';
-        ctx.font = 'bold 58px -apple-system,BlinkMacSystemFont,Helvetica Neue,sans-serif';
-        ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-        ctx.fillText('list', 90, 92);
-        const link = document.createElement('link');
-        link.rel = 'apple-touch-icon';
-        link.href = c.toDataURL('image/png');
-        document.head.appendChild(link);
+        function drawIcon() {
+            const c = document.createElement('canvas');
+            c.width = 180; c.height = 180;
+            const ctx = c.getContext('2d');
+            const grad = ctx.createLinearGradient(0, 0, 180, 180);
+            grad.addColorStop(0, '#0D0129');
+            grad.addColorStop(0.5, '#1A0440');
+            grad.addColorStop(1, '#2D0A6B');
+            ctx.fillStyle = grad;
+            const r = 36;
+            ctx.beginPath();
+            ctx.moveTo(r,0); ctx.lineTo(180-r,0); ctx.arcTo(180,0,180,r,r);
+            ctx.lineTo(180,180-r); ctx.arcTo(180,180,180-r,180,r);
+            ctx.lineTo(r,180); ctx.arcTo(0,180,0,180-r,r);
+            ctx.lineTo(0,r); ctx.arcTo(0,0,r,0,r);
+            ctx.closePath(); ctx.fill();
+            ctx.fillStyle = '#E2D0FF';
+            ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+            let size = 72;
+            ctx.font = `${size}px 'Great Vibes', cursive`;
+            while (ctx.measureText('record').width > 152 && size > 24) {
+                size -= 2;
+                ctx.font = `${size}px 'Great Vibes', cursive`;
+            }
+            ctx.fillText('record', 90, 98);
+            const link = document.createElement('link');
+            link.rel = 'apple-touch-icon';
+            link.href = c.toDataURL('image/png');
+            document.head.appendChild(link);
+        }
+        if (document.fonts && document.fonts.load) {
+            document.fonts.load("72px 'Great Vibes'").then(drawIcon).catch(drawIcon);
+        } else {
+            drawIcon();
+        }
     } catch(e) {}
 })();
 
@@ -1580,7 +1596,7 @@ window.addEventListener('load', () => {
     try {
         const m = { name:'list', short_name:'list', start_url:'./', display:'standalone',
             background_color:'#FFF5F7', theme_color:'#FF8FAB',
-            icons:[{src:'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><rect width="512" height="512" rx="110" fill="%237C3AED"/><text x="256" y="256" text-anchor="middle" dominant-baseline="middle" font-family="sans-serif" font-weight="800" font-size="172" fill="white">list</text></svg>',sizes:'any',type:'image/svg+xml'}]
+            icons:[{src:'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><defs><linearGradient id="g" x1="0" y1="0" x2="0.7" y2="1"><stop offset="0" stop-color="%230D0129"/><stop offset="0.5" stop-color="%231A0440"/><stop offset="1" stop-color="%232D0A6B"/></linearGradient></defs><rect width="512" height="512" rx="110" fill="url(%23g)"/><text x="256" y="278" text-anchor="middle" dominant-baseline="middle" font-family="Great Vibes, cursive" font-size="150" fill="%23E2D0FF">record</text></svg>',sizes:'any',type:'image/svg+xml'}]
         };
         const blob = new Blob([JSON.stringify(m)], {type:'application/manifest+json'});
         document.getElementById('manifestLink').href = URL.createObjectURL(blob);
