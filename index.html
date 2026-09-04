@@ -2,7 +2,7 @@
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>list</title>
     <link rel="manifest" id="manifestLink">
     <meta name="apple-mobile-web-app-capable" content="yes">
@@ -12,7 +12,13 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Great+Vibes&family=Jua&display=swap" rel="stylesheet">
     <style>
-        * { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+        * {
+            margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent;
+            touch-action:manipulation; -webkit-user-select:none; user-select:none; -webkit-touch-callout:none;
+        }
+        input, textarea, [contenteditable] {
+            -webkit-user-select:text; user-select:text; -webkit-touch-callout:default;
+        }
 
         :root {
             --pink: #FF2D8F;
