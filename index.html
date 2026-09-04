@@ -773,9 +773,9 @@ function itemHTML(type, id, item) {
                 <div class="item-title" style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;margin-bottom:4px;">${esc(item.title)}</div>
                 <div class="item-stars" style="margin-bottom:3px;">${[1,2,3,4,5].map(i => i<=r?'⭐':'☆').join('')}</div>
                 ${item.review ? `<div class="item-review">"${esc(item.review)}"</div>` : ''}
-                <div class="item-footer">
+                <div class="item-footer" style="justify-content:space-between;">
+                    <span>${item.mapUrl ? `<button class="map-mini-btn" data-url="${esc(item.mapUrl)}" onclick="event.stopPropagation();openMapLink(this.dataset.url)">🗺️</button>` : ''}</span>
                     <span class="item-date">${date}</span>
-                    ${item.mapUrl ? `<button class="map-mini-btn" data-url="${esc(item.mapUrl)}" onclick="event.stopPropagation();openMapLink(this.dataset.url)">🗺️</button>` : ''}
                 </div>
                 <div style="clear:both;"></div>
             </div>`;
